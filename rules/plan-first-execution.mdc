@@ -1,0 +1,325 @@
+---
+description: "Plan-first execution for complex tasks — clarify, design, approve, then deploy multi-agents"
+alwaysApply: true
+---
+
+# Plan-First Execution
+
+## Core Principle
+
+**Never execute complex tasks without an approved plan.** This rule enforces disciplined planning before any significant work begins.
+
+---
+
+## When Planning Is Required
+
+**MANDATORY planning for:**
+
+| Trigger | Examples |
+|---------|----------|
+| **New projects** | Greenfield apps, major features, new repositories |
+| **Architecture** | System design, database schemas, API design, service boundaries |
+| **Multi-file changes** | Touching 5+ files, cross-module refactors |
+| **Complex refactors** | State management, abstraction changes, migration work |
+| **Integration work** | Third-party APIs, new services, infrastructure |
+| **Performance optimization** | Profiling, caching layers, query optimization |
+| **Security-critical** | Auth flows, payment systems, data protection |
+| **User-requested** | Any time user says "plan first" or "what's your approach" |
+
+**Optional (use judgment):**
+- Single-file features with clear requirements
+- Obvious bug fixes with known root cause
+- Copy-paste refactors (same pattern 3+ times)
+
+---
+
+## Planning Workflow
+
+### Phase 1: Clarify & Scope (BEFORE Planning)
+
+**Ask questions BEFORE creating a plan:**
+
+1. **Requirements clarity** — What does success look like?
+2. **Constraints** — Timeline, budget, technical limitations?
+3. **Priorities** — Speed vs. quality vs. flexibility tradeoffs?
+4. **Existing work** — Prior attempts, related code, lessons learned?
+5. **Integration** — What systems/components does this touch?
+
+**Use AskQuestion tool when:**
+- Requirements are ambiguous (2+ valid interpretations)
+- Multiple architectural approaches exist with different tradeoffs
+- User preferences matter (e.g., library choice, pattern preference)
+- Scope is unclear ("add authentication" → which providers, flows, features?)
+
+**Do NOT start planning until requirements are clear.**
+
+---
+
+### Phase 2: Create Plan
+
+**Use CreatePlan tool with:**
+
+1. **Concise overview** — 1-2 sentences on what will be accomplished
+2. **Specific file paths** — Cite exact files to be created/modified
+3. **Essential code snippets** — Show key interfaces, types, or patterns (not full implementations)
+4. **Clear todos** — Actionable, verifiable tasks with unique IDs
+5. **Architecture diagrams** — Use Mermaid for complex flows or system design
+
+**Plan structure:**
+
+```markdown
+# Plan Title
+
+## Overview
+One-paragraph summary of what will be built and why.
+
+## Key Decisions
+- Decision 1: Option A vs B — chose A because [reason]
+- Decision 2: Library X vs Y — chose X because [reason]
+
+## Files to Change
+- `src/auth/login.ts` — Add OAuth2 flow
+- `src/api/users.ts` — New registration endpoint
+- `src/components/AuthForm.tsx` — UI for login/signup
+
+## Architecture
+```mermaid
+graph LR
+  A[Client] --> B[AuthForm]
+  B --> C[login.ts]
+  C --> D[OAuth Provider]
+```
+
+## Implementation Todos
+- [ ] `setup-auth` — Install dependencies, configure OAuth
+- [ ] `implement-login` — Create login endpoint and handler
+- [ ] `add-ui` — Build AuthForm component with validation
+- [ ] `write-tests` — Unit tests for auth logic
+```
+
+**Plan quality checklist:**
+- [ ] Every todo is independently actionable
+- [ ] File paths are explicit (not "auth files" or "components")
+- [ ] Tradeoffs are documented (why this approach over alternatives)
+- [ ] Success criteria are verifiable (tests, metrics, behaviors)
+- [ ] Dependencies between todos are clear
+
+---
+
+### Phase 3: User Approval
+
+**WAIT for explicit user approval before executing.**
+
+**Approval signals:**
+- "Looks good" / "Approved" / "Go ahead"
+- "Yes, that's the right approach"
+- "Start implementation" / "Build it"
+- User modifies the plan file directly
+
+**If user requests changes:**
+1. Update the plan using StrReplace or Edit tools
+2. Re-ask for approval if changes are significant
+3. Only proceed when user confirms
+
+**Do NOT start implementation until plan is approved.**
+
+---
+
+### Phase 4: Multi-Agent Execution
+
+**Once approved, deploy agents strategically:**
+
+**Agent types and use cases:**
+
+| Agent | Use For | Example |
+|-------|---------|---------|
+| `explore` | Codebase discovery, finding patterns, locating files | "Find all auth middleware" |
+| `shell` | Git ops, terminal commands, running tests | "Run test suite", "Create migration" |
+| `browser-use` | Web testing, UI verification, scraping | "Test login flow in browser" |
+| `generalPurpose` | Complex multi-file implementation | "Build the registration flow" |
+| `bugbot` | Code review of completed work | "Review my auth implementation" |
+| `security-review` | Security-critical code review | "Review payment integration" |
+
+**Parallel agent deployment:**
+
+When agents are independent (no shared state or dependencies):
+
+```
+Launch in parallel:
+- Agent 1: explore — Find all existing auth components
+- Agent 2: shell — Install required dependencies
+- Agent 3: generalPurpose — Implement login.ts
+```
+
+When agents have dependencies:
+
+```
+Sequential:
+1. Agent 1: explore → Returns file locations
+2. Agent 2: generalPurpose → Uses file locations to implement
+3. Agent 3: bugbot → Reviews implementation
+```
+
+**Agent coordination:**
+
+- Give each agent a clear, scoped prompt
+- Include relevant context (file paths, prior decisions)
+- Set `run_in_background: true` for long-running tasks
+- Use `readonly: true` for exploration agents
+- Specify expected output format in prompt
+
+**Example multi-agent launch:**
+
+```typescript
+// Agent 1: Explore existing patterns
+Task({
+  subagent_type: "explore",
+  description: "Find auth patterns",
+  prompt: "Find all authentication middleware and patterns in src/auth/. Return: 1) File paths, 2) Common patterns used, 3) Existing types/interfaces",
+  readonly: true
+})
+
+// Agent 2: Implement login
+Task({
+  subagent_type: "generalPurpose",
+  description: "Implement login endpoint",
+  prompt: "Implement POST /api/login using OAuth2. Follow patterns from existing auth middleware. Files to modify: src/auth/login.ts, src/types/auth.ts. See plan in plan.md#implement-login",
+  run_in_background: true
+})
+
+// Agent 3: Run tests
+Task({
+  subagent_type: "shell",
+  description: "Run auth tests",
+  prompt: "npm test -- src/auth",
+  run_in_background: true
+})
+```
+
+---
+
+### Phase 5: Verification & Handoff
+
+**After agents complete:**
+
+1. **Verify todos** — Check each plan todo is complete
+2. **Run tests** — Ensure all tests pass
+3. **Bugbot review** — For significant changes, run Bugbot subagent
+4. **Security review** — For auth/payments/data, run security-review subagent
+5. **Update plan** — Mark todos complete, note any deviations
+
+**Report to user:**
+
+```
+✅ Implementation Complete
+
+**Completed:**
+- [x] setup-auth — Installed next-auth, configured providers
+- [x] implement-login — Login endpoint working with OAuth2
+- [x] add-ui — AuthForm component with validation
+- [x] write-tests — 12 tests passing
+
+**Reviews:**
+- Bugbot: 2 minor suggestions fixed (see PR #123)
+- Security: No critical issues, 1 recommendation (rate limiting added)
+
+**Next Steps:**
+- Deploy to staging for QA
+- User testing scheduled for [date]
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### ❌ Planning Failures
+
+| Anti-Pattern | Problem | Fix |
+|--------------|---------|-----|
+| **Assumption-driven** | "I assumed you wanted X" | Ask before planning |
+| **Vague todos** | "Implement auth" | "Add POST /api/login with OAuth2" |
+| **No file paths** | "Update components" | "Modify src/components/AuthForm.tsx" |
+| **Skipping approval** | Starting before user confirms | Always wait for explicit approval |
+| **Over-engineering** | 20 todos for a toggle button | Simplicity first (Karpathy) |
+
+### ❌ Execution Failures
+
+| Anti-Pattern | Problem | Fix |
+|--------------|---------|-----|
+| **Serial when parallel works** | 5 agents running one-by-one | Launch independent agents together |
+| **Unclear prompts** | "Fix the auth stuff" | "Implement login.ts per plan.md#todo-3" |
+| **No verification** | Assuming agents succeeded | Check outputs, run tests, review code |
+| **Agent sprawl** | 10 agents for a simple task | Use direct tools for simple work |
+
+---
+
+## Integration with Other Rules
+
+### Karpathy Thinking
+
+This rule **extends** karpathy-thinking.mdc:
+- **Think Before Coding** → Phase 1 (Clarify) + Phase 2 (Plan)
+- **Simplicity First** → Plan quality checklist (reject over-engineering)
+- **Surgical Changes** → Plan todos must be scoped to specific files
+- **Goal-Driven** → Plan todos must have verifiable outcomes
+
+### Caveman Communication
+
+- **Planning phase** → Normal communication (clear, detailed)
+- **Execution phase** → Caveman style for status updates
+- **Handoff** → Caveman summary of completed work
+
+### Security Standards
+
+- **Security-critical tasks** → Mandatory security-review subagent
+- **Planning phase** → Document threat model in plan
+- **Execution phase** → Security checklist in verification
+
+---
+
+## Quick Reference
+
+**Before starting ANY complex task:**
+
+```
+1. Clarify requirements (ask questions)
+2. Create plan (CreatePlan tool)
+3. Get approval (wait for user confirmation)
+4. Deploy agents (parallel when possible)
+5. Verify & report (check todos, run tests, review)
+```
+
+**Decision tree:**
+
+```
+Is this complex? (5+ files, architecture, new feature)
+├─ NO → Use direct tools (Cmd+K, Shell, Read/Write)
+└─ YES → Plan first
+    ├─ Requirements clear?
+    │   ├─ NO → Ask questions (AskQuestion tool)
+    │   └─ YES → Create plan
+    │       ├─ Plan approved?
+    │       │   ├─ NO → Revise plan
+    │       │   └─ YES → Deploy multi-agents
+    │       └─ Verify completion
+```
+
+---
+
+## Enforcement
+
+**This rule is always active.** Violations trigger immediate correction:
+
+- If you start coding without a plan → Stop and create plan first
+- If you assume requirements → Stop and ask clarifying questions
+- If you deploy agents without clear prompts → Stop and clarify scope
+- If you skip verification → Run tests and reviews before reporting
+
+**Exceptions:**
+- User explicitly says "skip planning" or "just do it"
+- Emergency hotfixes (document assumptions post-hoc)
+- Trivial changes (<5 lines, obvious fix)
+
+---
+
+*This rule complements karpathy-thinking.mdc and caveman.mdc. Together they enforce: think first, plan approved, execute efficiently, communicate clearly.*

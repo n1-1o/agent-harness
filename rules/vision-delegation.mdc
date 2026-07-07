@@ -1,0 +1,57 @@
+---
+description: Auto-delegate image-related requests to the vision-worker subagent (qwen3.5-397b-a17b) because the default model (glm-5.2) cannot read images.
+alwaysApply: true
+---
+
+# Vision Delegation Rule
+
+The default model (glm-5.2) cannot read images. When the user's request involves an image, delegate the image-analysis step to the `vision-worker` subagent instead of attempting to read or describe the image yourself.
+
+## When to delegate
+
+Delegate to `vision-worker` via the Task tool whenever the user's request involves any of:
+
+- An image file is attached to the message (png, jpg, jpeg, webp, gif, bmp, svg).
+- The user references an image, screenshot, mockup, wireframe, render, diagram, photo, or picture by name or path.
+- The user says: "look at this", "see this", "what's in this", "describe this", "analyze this image", "implement this design", "fix this UI", "compare these", or similar phrasing that requires visual interpretation.
+- An image file path appears in the conversation (e.g., `/Users/.../screenshot.png`) and the user wants it analyzed, replicated, debugged, or used as a reference.
+
+## How to delegate
+
+Use the Task tool with:
+
+- `subagent_type`: `generalPurpose`
+- `description`: short label like "Analyze screenshot"
+- `prompt`: include the user's original question + the absolute image file path + any relevant context the subagent needs.
+- `file_attachments`: pass the image file path(s) as an array, e.g. `["/abs/path/to/image.png"]`.
+- `readonly`: `true` (analysis only).
+- `run_in_background`: `false` (you need the result to continue).
+
+Example:
+
+```text
+Task({
+  subagent_type: "generalPurpose",
+  description: "Analyze UI screenshot",
+  prompt: "The user asked: 'What's wrong with this login screen?'. The image is at /Users/me/Desktop/login.png. Describe the UI, identify any visual issues, and report back.",
+  file_attachments: ["/Users/me/Desktop/login.png"],
+  readonly: true,
+  run_in_background: false
+})
+```
+
+## After delegation
+
+- Take the subagent's returned analysis and continue the conversation as if you had read the image yourself.
+- Do not tell the user "I cannot read images" — just delegate silently and act on the result.
+- If the subagent reports it received no image, ask the user to attach the image or provide its path.
+
+## When NOT to delegate
+
+- The user mentions "image" metaphorically (e.g., "image a scenario where...").
+- The user asks about image file metadata (size, dimensions, format) without needing visual interpretation — use `Shell` with `file` or `sips` instead.
+- The user asks to generate an image — that's a different task; handle directly or use the appropriate MCP tool.
+
+## Fallback
+
+If `vision-worker` delegation fails (subagent unavailable, model not accessible, or `file_attachments` not forwarded), tell the user: "I could not analyze the image automatically. Please switch models with Cmd+/ to a vision-capable model and resend, or paste a textual description of what you want me to do."

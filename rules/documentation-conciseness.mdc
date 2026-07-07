@@ -1,0 +1,202 @@
+# Documentation Conciseness Rule
+
+## Purpose
+
+Minimize documentation fragmentation and keep content concise to save tokens and improve maintainability. Organize documents by audience and purpose.
+
+## Core Principles
+
+### 1. One Source of Truth Per Topic
+
+**Rule:** No duplicate or overlapping content across documents.
+
+- Each topic has exactly one canonical reference
+- Link to existing docs instead of copying content
+- Merge documents that cover the same subject
+
+**Rationale:** Duplicate docs drift out of sync and waste tokens.
+
+### 2. Organize by Audience
+
+**Folder structure:**
+
+```
+project/
+├── README.md                    # Entry point (always at root)
+├── docs/
+│   ├── product/                 # Product managers, stakeholders
+│   │   ├── PRD.md               # Requirements + success metrics
+│   │   └── roadmap.md           # Timeline, milestones
+│   ├── design/                  # Designers, frontend engineers
+│   │   ├── DESIGN.md            # UI/UX specifications
+│   │   └── assets/              # Images, diagrams
+│   ├── technical/               # Engineers
+│   │   ├── ARCHITECTURE.md      # System design
+│   │   ├── API.md               # API specifications
+│   │   ├── DEBUGGING.md         # Troubleshooting guides
+│   │   └── deployment.md        # Deploy instructions
+│   ├── user/                    # End users
+│   │   ├── GETTING-STARTED.md   # User onboarding
+│   │   └── FAQ.md               # Common questions
+│   └── research/                # Background context
+│       ├── competitive-analysis.md
+│       └── user-research.md
+```
+
+**Decision rules:**
+- Engineers reading code? → `technical/`
+- Users learning features? → `user/`
+- Defining what to build? → `product/`
+- Visual/interaction specs? → `design/`
+- Background research? → `research/`
+
+### 3. Progressive Disclosure
+
+**Structure for skimmability:**
+
+```
+Level 1: README.md (200-300 lines)
+ └─ Overview, quickstart, links to deep-dives
+ 
+Level 2: Category docs (400-600 lines)
+ └─ PRD.md, DESIGN.md, ARCHITECTURE.md
+ 
+Level 3: Supporting docs (400-600 lines each)
+ └─ API.md, DEBUGGING.md, deployment.md
+```
+
+**Reading pattern:**
+1. README for orientation (2 min)
+2. Category doc for requirements (5 min)
+3. Supporting docs for implementation (10-15 min each)
+
+### 4. Token-Aware Writing
+
+**Every section must justify its token cost:**
+
+**Ask before adding:**
+1. Is this section actionable?
+2. Will engineers reference this during implementation?
+3. Can this be expressed in fewer words?
+4. Is this a link to existing content?
+
+**Writing guidelines:**
+- Use tables over prose (3x more token-efficient)
+- Use code examples sparingly (only for complex logic)
+- Use ASCII wireframes over verbose descriptions
+- Remove "status" sections after completion
+- Archive completed phases (move to appendix or delete)
+
+### 5. File Size Targets
+
+| Document Type | Target | Maximum | Action if Exceeded |
+|-----|-----|---|----|
+| README.md | 200-300 lines | 400 lines | Move details to category docs |
+| Core specs (PRD/DESIGN/ARCH) | 400-600 lines | 800 lines | Split by topic or sub-module |
+| Supporting docs | 400-600 lines | 800 lines | Extract sub-topics to separate files |
+| User docs | 200-400 lines | 600 lines | Split by user journey or feature |
+
+**Before exceeding budget:**
+1. Review existing sections for removal
+2. Consolidate overlapping content
+3. Move completed phases to appendix
+4. Ask: "What can I delete?"
+
+## Enforcement
+
+### Before Creating a New Document
+
+Ask these questions:
+
+1. **"Does this topic already have a doc?"**
+   - Yes → Add to existing doc or create sub-section
+   - No → Continue to question 2
+
+2. **"What audience is this for?"**
+   - Engineers → `docs/technical/`
+   - Designers → `docs/design/`
+   - Product → `docs/product/`
+   - Users → `docs/user/`
+   - Research → `docs/research/`
+
+3. **"Will this be referenced independently?"**
+   - Yes → Create separate file
+   - No → Add as section in existing doc
+
+### Before Writing a Section
+
+Ask:
+
+1. **"Is this already documented elsewhere?"** → Link instead
+2. **"Can this be a table instead of prose?"** → Use table
+3. **"Do I need full code or just the interface?"** → Show interface only
+4. **"Is this status/timeline still relevant?"** → Remove if stale
+
+### Naming Conventions
+
+**Core specifications (UPPERCASE):**
+- `PRD.md`, `DESIGN.md`, `ARCHITECTURE.md`, `API.md`
+
+**Supporting documents (lowercase):**
+- `deployment.md`, `debugging.md`, `troubleshooting.md`, `runbook.md`
+
+**Prefix for sorting (optional):**
+- `01-PRD.md`, `02-DESIGN.md`, `03-ARCHITECTURE.md`
+- `debug-auth.md`, `debug-performance.md`
+
+## Maintenance
+
+### Quarterly Review
+
+Every quarter, review project documentation:
+
+1. **Delete completed phases** — Move to appendix or delete
+2. **Remove stale status updates** — "In progress" → done
+3. **Consolidate overlapping docs** — Merge if topics overlap >30%
+4. **Update cross-references** — Ensure links work
+
+### When Onboarding New Projects
+
+1. Create README.md first (overview)
+2. Create core specs (PRD.md, DESIGN.md, ARCHITECTURE.md) as needed
+3. Add supporting docs only when topic requires depth
+4. Resist creating new files for sections that fit in existing docs
+
+## Examples
+
+### Good: Organized by Audience
+
+```
+project/
+├── README.md (273 lines)
+├── docs/
+│   ├── product/
+│   │   └── PRD.md (573 lines)
+│   ├── design/
+│   │   └── DESIGN.md (443 lines)
+│   ├── technical/
+│   │   ├── ARCHITECTURE.md (520 lines)
+│   │   ├── API.md (380 lines)
+│   │   └── DEBUGGING.md (290 lines)
+│   └── user/
+│       └── GETTING-STARTED.md (227 lines)
+```
+
+**Total:** 2,706 lines, 7 files ✅ Clear organization, no overlap
+
+### Bad: Flat Structure with Overlap
+
+```
+project/
+├── README.md
+├── PRD.md
+├── DESIGN.md
+├── API-SPEC.md              ← Duplicate API content
+├── IMPLEMENTATION.md        ← Overlaps with ARCHITECTURE
+├── TROUBLESHOOTING.md       ← Should be in technical/
+├── DEBUGGING-GUIDE.md       ← Duplicate troubleshooting content
+├── USER-GUIDE.md            ← Should be in user/
+└── ONBOARDING.md            ← Duplicate onboarding content
+```
+
+**Total:** 4,100 lines, 9 files ❌ No organization, overlapping topics

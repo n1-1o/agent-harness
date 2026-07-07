@@ -1,0 +1,579 @@
+---
+description: "Security standards: OWASP Top 10, input validation, auth, XSS/CSRF protection"
+alwaysApply: true
+---
+
+# Security Standards
+
+## Core Principles
+
+### 1. Zero Trust Architecture
+- Never trust user input — validate everything
+- Assume breach — design defense in depth
+- Verify explicitly — authenticate and authorize every request
+- Use least privilege — minimal permissions by default
+
+### 2. Defense in Depth
+- Multiple layers of security controls
+- Fail securely — default to deny on errors
+- Log security events — audit trails for incidents
+- Encrypt data — in transit (TLS) and at rest
+
+### 3. Security by Design
+- Threat modeling during planning
+- Security requirements in definition of done
+- Secure defaults — opt-in for risky features
+
+---
+
+## Input Validation & Sanitization
+
+### Mandatory Server-Side Validation
+
+**Never rely on client-side validation alone.** Client validation is for UX only.
+
+```typescript
+// ❌ BAD: Client-side only
+<form onSubmit={handleSubmit}>
+  <input name="email" type="email" />
+</form>
+
+// ✅ GOOD: Server-side with Zod
+import { z } from 'zod'
+
+const UserSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be 8+ characters'),
+  age: z.number().min(18, 'Must be 18+')
+})
+
+// In API route or server action
+export async function createUser(data: unknown) {
+  const result = UserSchema.safeParse(data)
+  if (!result.success) {
+    return { error: 'Validation failed', details: result.error }
+  }
+  // Process validated data
+}
+```
+
+### Zod Schema Patterns
+
+```typescript
+// User registration
+const RegisterSchema = z.object({
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8)
+    .regex(/[A-Z]/, 'Must contain uppercase')
+    .regex(/[a-z]/, 'Must contain lowercase')
+    .regex(/[0-9]/, 'Must contain number')
+    .regex(/[^A-Za-z0-9]/, 'Must contain special character'),
+  name: z.string().min(1).max(100),
+  role: z.enum(['user', 'admin']).default('user')
+})
+
+// API pagination
+const PaginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20)
+})
+```
+
+### SQL Injection Prevention
+
+```typescript
+// ❌ BAD: String interpolation (SQL injection risk)
+const query = `SELECT * FROM users WHERE email = '${email}'`
+
+// ✅ GOOD: Parameterized query
+const query = 'SELECT * FROM users WHERE email = $1'
+const result = await db.query(query, [email])
+
+// ✅ GOOD: ORM with built-in protection
+const user = await db.user.findUnique({ where: { email } })
+```
+
+### XSS Prevention
+
+```typescript
+// ❌ BAD: Direct HTML injection
+<div dangerouslySetInnerHTML={{ __html: userContent }} />
+
+// ✅ GOOD: Sanitize with DOMPurify
+import DOMPurify from 'dompurify'
+<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userContent) }} />
+
+// ✅ BETTER: Escape and render as text
+<div>{userContent}</div>
+```
+
+**CSP Configuration:**
+
+```typescript
+// next.config.js
+const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "img-src 'self' blob: data: https:",
+      "connect-src 'self' https://api.example.com",
+      "frame-ancestors 'none'",
+    ].join('; ')
+  }
+]
+
+module.exports = {
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }]
+  }
+}
+```
+
+---
+
+## Authentication & Session Management
+
+### Recommended: NextAuth.js Configuration
+
+```typescript
+// pages/api/auth/[...nextauth].ts
+import NextAuth from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import { z } from 'zod'
+
+export default NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        const schema = z.object({
+          email: z.string().email(),
+          password: z.string().min(8)
+        })
+        
+        const result = schema.safeParse(credentials)
+        if (!result.success) throw new Error('Invalid credentials')
+
+        const user = await verifyUser(result.data)
+        if (!user) throw new Error('Invalid credentials')
+
+        return { id: user.id, email: user.email, role: user.role }
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-authjs.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true // HTTPS only
+      }
+    }
+  }
+})
+```
+
+### Refresh Token Rotation
+
+```typescript
+export async function POST(req: Request) {
+  const { refreshToken } = await req.json()
+  const decoded = await verifyRefreshToken(refreshToken)
+  if (!decoded) return new Response('Invalid token', { status: 401 })
+
+  const newAccessToken = generateAccessToken(decoded.user)
+  const newRefreshToken = generateRefreshToken(decoded.user)
+  await invalidateRefreshToken(refreshToken) // Rotation
+
+  return Response.json({ accessToken: newAccessToken, refreshToken: newRefreshToken })
+}
+```
+
+### Password Requirements
+
+```typescript
+const PasswordSchema = z
+  .string()
+  .min(12, 'Password must be at least 12 characters')
+  .regex(/[A-Z]/, 'Must contain uppercase letter')
+  .regex(/[a-z]/, 'Must contain lowercase letter')
+  .regex(/[0-9]/, 'Must contain number')
+  .regex(/[^A-Za-z0-9]/, 'Must contain special character')
+
+// Hash securely
+import { hash, verify } from 'bcryptjs'
+const hashedPassword = await hash(password, 12)
+const isValid = await verify(password, hashedPassword)
+```
+
+---
+
+## Authorization
+
+### Role-Based Access Control (RBAC)
+
+```typescript
+type Role = 'user' | 'admin' | 'moderator'
+
+const permissions: Record<Role, string[]> = {
+  user: ['read:own', 'update:own'],
+  moderator: ['read:own', 'update:own', 'read:all', 'delete:posts'],
+  admin: ['*'] // All permissions
+}
+
+function hasPermission(role: Role, requiredPermission: string): boolean {
+  const rolePermissions = permissions[role]
+  return rolePermissions.includes('*') || rolePermissions.includes(requiredPermission)
+}
+
+// Usage in API route
+export async function DELETE(req: Request) {
+  const session = await getSession()
+  if (!hasPermission(session.user.role, 'delete:posts')) {
+    return new Response('Forbidden', { status: 403 })
+  }
+  // Proceed with deletion
+}
+```
+
+### Resource-Level Access Control
+
+```typescript
+export async function updateDocument(id: string, data: UpdateData, userId: string) {
+  const document = await db.document.findUnique({ where: { id } })
+  if (!document) throw new Error('Document not found')
+  if (document.ownerId !== userId) throw new Error('Unauthorized access')
+  return db.document.update({ where: { id }, data })
+}
+```
+
+---
+
+## Common Vulnerabilities (OWASP Top 10)
+
+### 1. XSS Prevention
+- Use React's built-in XSS protection (automatic escaping)
+- Avoid `dangerouslySetInnerHTML` unless sanitized with DOMPurify
+- Set `X-XSS-Protection: 1; mode=block` header
+- Use CSP `script-src` directive
+
+### 2. CSRF Protection
+
+```typescript
+// next.config.js
+module.exports = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+      allowedOrigins: ['https://yourdomain.com']
+    }
+  }
+}
+
+// Manual CSRF token
+import { randomBytes } from 'crypto'
+const csrfToken = randomBytes(32).toString('hex')
+session.csrfToken = csrfToken
+
+// In form
+<input type="hidden" name="csrfToken" value={csrfToken} />
+
+// In API route
+export async function POST(req: Request) {
+  const session = await getSession()
+  const { csrfToken } = await req.formData()
+  if (csrfToken !== session.csrfToken) throw new Error('CSRF token mismatch')
+}
+```
+
+### 3. CORS Configuration
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+
+export function middleware(req: NextRequest) {
+  const allowedOrigins = ['https://yourdomain.com']
+  const origin = req.headers.get('origin') || ''
+  const response = NextResponse.next()
+  
+  if (allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  }
+  return response
+}
+```
+
+### 4. Rate Limiting
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
+  analytics: true
+})
+
+export async function POST(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') || 'unknown'
+  const { success, limit, remaining, reset } = await ratelimit.limit(ip)
+  
+  if (!success) {
+    return new Response('Too many requests', {
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString()
+      }
+    })
+  }
+  // Proceed with request
+}
+```
+
+### 5. SQL Injection Prevention
+- Always use parameterized queries (see Input Validation section)
+- Never concatenate user input into SQL strings
+- Use ORM query builders when possible
+
+### 6. NoSQL Injection Prevention
+
+```typescript
+// ❌ BAD: Direct object spread
+const user = await db.users.findOne({ username: req.query.username })
+
+// ✅ GOOD: Explicit field mapping with validation
+const schema = z.object({ username: z.string().regex(/^[a-zA-Z0-9_]+$/) })
+const { username } = schema.parse(req.query)
+const user = await db.users.findOne({ username })
+```
+
+### 7. SSRF Prevention
+
+Validate URLs before fetching. Block private IP ranges and non-http protocols.
+
+---
+
+## Security Headers
+
+```typescript
+// next.config.js
+const securityHeaders = [
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Download-Options', value: 'noopen' },
+  { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; frame-ancestors 'none'" }
+]
+
+module.exports = {
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }]
+  }
+}
+```
+
+| Header | Purpose | Value |
+|--------|---------|-------|
+| `Strict-Transport-Security` | Force HTTPS | `max-age=63072000; includeSubDomains; preload` |
+| `X-Frame-Options` | Prevent clickjacking | `SAMEORIGIN` |
+| `X-Content-Type-Options` | Prevent MIME sniffing | `nosniff` |
+| `Content-Security-Policy` | Resource restrictions | See above |
+
+---
+
+## Secrets Management
+
+### Environment Variables
+
+```bash
+# .env.local (gitignored)
+DATABASE_URL="postgresql://user:password@localhost:5432/db"
+NEXTAUTH_SECRET="your-secret-key-min-32-chars"
+NEXTAUTH_URL="https://yourdomain.com"
+API_KEY="sk-..."
+```
+
+```typescript
+// ✅ GOOD: Use process.env
+const apiKey = process.env.API_KEY
+
+// ❌ BAD: Hardcoded secrets
+const apiKey = 'sk-1234567890'
+```
+
+### Secret Validation on Startup
+
+```typescript
+// lib/env.ts
+import { z } from 'zod'
+
+const envSchema = z.object({
+  DATABASE_URL: z.string().url(),
+  NEXTAUTH_SECRET: z.string().min(32),
+  NEXTAUTH_URL: z.string().url(),
+  API_KEY: z.string().startsWith('sk-')
+})
+
+export function validateEnv() {
+  const result = envSchema.safeParse(process.env)
+  if (!result.success) {
+    console.error('❌ Missing required environment variables:', result.error.format())
+    process.exit(1)
+  }
+  return result.data
+}
+
+validateEnv() // Call in next.config.js or custom server
+```
+
+### Secret Rotation
+
+Support multiple secrets during rotation. Accept both old and new during transition, then remove old after grace period.
+
+---
+
+## Security Checklist for PRs
+
+### Mandatory Review Items
+
+**Before merging any PR, verify:**
+
+#### Input Validation
+- [ ] All user inputs validated with Zod schemas
+- [ ] Server-side validation implemented (not just client)
+- [ ] File uploads have type and size restrictions
+- [ ] SQL/NoSQL queries use parameterization
+
+#### Authentication & Authorization
+- [ ] Protected routes require authentication
+- [ ] Permission checks on sensitive operations
+- [ ] Resource ownership verified before modification
+- [ ] Session management secure (HTTP-only cookies)
+
+#### XSS Prevention
+- [ ] No `dangerouslySetInnerHTML` without sanitization
+- [ ] User content escaped by default
+- [ ] CSP headers configured
+
+#### CSRF Protection
+- [ ] State-changing requests have CSRF tokens
+- [ ] CORS configured correctly
+- [ ] SameSite cookie attribute set
+
+#### Security Headers
+- [ ] HSTS enabled
+- [ ] X-Frame-Options set
+- [ ] X-Content-Type-Options set
+
+#### Secrets Management
+- [ ] No secrets in code (use environment variables)
+- [ ] `.env` files in `.gitignore`
+
+#### Error Handling
+- [ ] Errors don't leak sensitive information
+- [ ] Stack traces hidden in production
+- [ ] Security events logged
+
+#### Dependencies
+- [ ] No known vulnerabilities (`npm audit`)
+- [ ] Dependencies up to date
+
+### `<SECURITY_REVIEW>` Tag Usage
+
+**Use this tag when conducting security reviews:**
+
+```markdown
+<SECURITY_REVIEW>
+**Threat Model:**
+- Attack vector: SQL injection via search parameter
+- Impact: Full database access
+- Likelihood: High (public endpoint)
+
+**Mitigation:**
+1. Added Zod validation for search input
+2. Switched to parameterized query
+3. Added rate limiting (10 req/10s)
+
+**Verification:**
+- [x] Unit tests for invalid inputs
+- [x] Integration test for SQL injection attempt
+</SECURITY_REVIEW>
+```
+
+---
+
+## Accessibility Security (WCAG AA)
+
+### Secure Accessibility Patterns
+
+```typescript
+// ✅ GOOD: Accessible and secure
+<button
+  onClick={handleDelete}
+  aria-label="Delete item"
+  disabled={!canDelete}
+  tabIndex={canDelete ? 0 : -1}
+>
+  Delete
+</button>
+
+// ❌ BAD: Keyboard trap
+<div onKeyDown={handleKeyDown} tabIndex={0}>
+  {/* Focus cannot escape this element */}
+</div>
+```
+
+### Focus Management in Modals
+
+Trap focus within modals for security and accessibility. Ensure Tab cycles through focusable elements and Escape closes modal.
+
+### ARIA Security Considerations
+
+```typescript
+// ✅ GOOD: Accurate ARIA labels
+<button aria-label="Close dialog" onClick={() => setIsOpen(false)}>✕</button>
+
+// ❌ BAD: Misleading ARIA (security risk for screen reader users)
+<button aria-label="View profile" onClick={handleDelete}>✕</button> // Actually deletes!
+```
+
+---
+
+## References
+
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [Next.js Security](https://nextjs.org/docs/pages/building-your-application/authentication)
+- [Zod](https://zod.dev/)
+- [NextAuth.js](https://next-auth.js.org/)
+- [CSP Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+- [WCAG 2.1 AA](https://www.w3.org/WAI/WCAG21/quickref/)
+
+---
+
+*This rule is enforced by default. Use `<SECURITY_REVIEW>` tag when conducting security reviews in PRs.*
