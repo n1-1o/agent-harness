@@ -2,28 +2,7 @@
 
 **A growing collection of rules, skills, and scaffolding for product builders and designers who orchestrate AI agents.**
 
-Since I started using agentic AI, I kept noticing the same failures come back. An agent rebuilds a component from scratch instead of using the design system. Output that looks finished and is wrong. Confidence that isn't an independent check.
-
-When a failure happens more than once, I turn it into a rule or a skill so the agent can't make it again. Over time, that pile of guardrails became my harness — the scaffolding around the model that keeps making it better.
-
-This repo is a **living, growing collection** of the harness pieces I use daily as a designer and product builder. It's not static — I audit quarterly, add what works, delete what doesn't, and keep only the best and most relevant.
-
-**Not for engineers:** This isn't about writing code faster. It's about designing and building better products with AI as your collaborator. The rules, skills, and patterns here are tuned for product thinking, design craft, and orchestration — not engineering velocity.
-
-**Medium article:** [My Agent Harness: The Scaffolding I Accrued From Failures](../work/Content/medium-agent-harness-stack.md)
-
----
-
-## The Four-Layer System
-
-| Layer | Purpose | What's included |
-|-------|---------|-----------------|
-| **Rules (firmware)** | Always-fire deterministic constraints | 5 rules + token-budget guardrail |
-| **Skills (playbooks)** | Compressed lessons from past work | 6 skill families |
-| **Subagents (delegates)** | Parallel probabilistic workers | explore, shell, browser-use, bugbot, security-review, vision-worker, etc. |
-| **MCPs (external hooks)** | API contracts to external systems | Figma, Vercel, GitLab, browser layer |
-
-See `docs/DESIGN.md` for the full mental model.
+Tool-agnostic — works with **Cursor**, **Claude Code**, and other AI IDEs that support rules/skills.
 
 ---
 
@@ -32,32 +11,28 @@ See `docs/DESIGN.md` for the full mental model.
 ### One-liner (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nguyentran-ngo/agent-harness/main/install.sh | bash
+# For Cursor (default)
+curl -fsSL https://raw.githubusercontent.com/n1-1o/agent-harness/main/install.sh | bash
+
+# For Claude Code
+curl -fsSL https://raw.githubusercontent.com/n1-1o/agent-harness/main/install.sh | bash -s -- --target claude
 ```
 
 ### Manual clone
 
 ```bash
-git clone https://github.com/nguyentran-ngo/agent-harness.git
+git clone https://github.com/n1-1o/agent-harness.git
 cd agent-harness
+
+# For Cursor (default)
 ./install.sh
+
+# For Claude Code
+./install.sh --target claude
+
+# Copy instead of symlink (if you want to edit locally)
+./install.sh --no-symlink
 ```
-
-### Options
-
-- `--no-symlink`: Copy files instead of symlinking (use if you want to edit locally)
-
-### What it does
-
-- Symlinks rules into `~/.cursor/rules/`
-- Symlinks skills into `~/.cursor/skills/`
-- Prints next steps for MCP setup
-
-### Next steps
-
-1. **Restart Cursor** to load the new rules and skills
-2. **Set up MCPs**: see [`mcps/README.md`](mcps/README.md)
-3. **Read the Medium article** for the full story
 
 ---
 
@@ -155,15 +130,17 @@ Those matter — but they're not what this collection is for.
 ```
 agent-harness/
 ├── README.md                 # This file
-├── install.sh                # CLI installer
-├── rules/                    # Curated .mdc rule files
-├── skills/                   # Curated SKILL.md files
+├── install.sh                # Tool-agnostic installer (Cursor, Claude Code)
+├── agent-rules/              # Curated .mdc rule files (tool-agnostic)
+├── agent-skills/             # Curated SKILL.md files (tool-agnostic)
 ├── mcps/
-│   ├── README.md             # MCP setup guide
-│   └── mcp.json.example      # Copy-paste template
+│   ├── README.md             # MCP setup guide (Cursor-specific; adapt for other tools)
+│   └── mcp.json.example      # Copy-paste template for Cursor
 └── docs/
     └── DESIGN.md             # The 4-layer mental model
 ```
+
+**Note:** MCPs are Cursor-specific in this repo. For Claude Code or other tools, adapt the MCP setup to the tool's equivalent integration pattern.
 
 ---
 
