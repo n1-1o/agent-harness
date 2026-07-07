@@ -55,3 +55,14 @@ Task({
 ## Fallback
 
 If `vision-worker` delegation fails (subagent unavailable, model not accessible, or `file_attachments` not forwarded), tell the user: "I could not analyze the image automatically. Please switch models with Cmd+/ to a vision-capable model and resend, or paste a textual description of what you want me to do."
+
+## Evidence-First Debugging (Visual/UI/3D)
+
+- Treat screenshots, recordings, and last known-good checkpoints as first-class evidence. Ask for them early when debugging UI, camera, model, texture, lighting, or layout regressions.
+- When the user says something "worked before", identify the checkpoint before changing code: commit, branch, deployed URL, asset filename, screenshot, or approximate timestamp.
+- For Three.js/WebGL/model bugs, compare old vs new assets before adding React-side workarounds. Inspect GLB JSON chunks for scene nodes, root transforms, accessor bounds, materials, textures, and extensions.
+- Do not assume a visual flash means missing source textures. Distinguish placeholder render, CPU decode, image decode, GPU texture upload, and shader/program compilation with runtime evidence.
+- Prefer precise probes over broad fixes: loader lifecycle, first visible frame, material/map readiness, renderer texture/program counts, camera position/target/up, and world bounds.
+- If a hypothesis is rejected by logs or screenshots, remove its code before trying another. Do not stack speculative rotations, camera offsets, or fallback guards.
+- Preserve working camera presets when replacing assets. If all views become wrong after asset conversion, suspect lost or baked transforms before editing the cameras.
+- Cleanup is part of the fix: remove debug fetches, probe components, session logs, temporary asset metadata, and rejected workaround plumbing after verification.

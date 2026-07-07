@@ -39,15 +39,16 @@ Those matter — but they're not what this collection is for.
 
 **Purpose:** Always-fire deterministic constraints. Each rule exists to make the agent's design and build output better, not just to constrain behavior.
 
-**Curated to 5 + budget guardrail:**
+**Curated to 6 + budget guardrail:**
 
 | Rule | Escape prevented | Origin |
 |------|------------------|--------|
 | `plan-first-execution` | "Code without design framing" | Subsumes Karpathy's 4 principles |
 | `caveman` | Verbose output burns attention | Frugality — maximize ROI per token |
-| `vision-delegation` | Model fakes image understanding | GLM-5.2 lacks vision capability |
-| `security-standards` | Auth/XSS/secret escapes | Zero-trust architecture |
+| `vision-delegation` | Model fakes image understanding | GLM-5.2 lacks vision capability; also folds in Evidence-First Debugging |
+| `security-standards` | Auth/XSS/secret escapes | Zero-trust; security-specific ARIA only (general a11y moved to front-end-development) |
 | `documentation-conciseness` | Doc bloat maintenance cost | Agents write too many long docs |
+| `front-end-development` | Reinventing patterns instead of using the stack | React/Next/Zod/Shadcn + general a11y (WCAG AA) |
 | Token-budget guardrail | Cost escapes | Pro plan $20 cap |
 
 ---
@@ -64,7 +65,7 @@ Those matter — but they're not what this collection is for.
 | `knowledge-librarian` | Insight trapped in chat history | Lifelong learning belief |
 | `model-router` | Wasting expensive tokens on cheap work | Frugality |
 | `product-experts` + `research-market-competitor` | Building without product context | Product-thinking triad |
-| `impeccable` | Design craft missing | Subsumes emil-design-eng + interface-design |
+| `impeccable` | Design craft missing | Subsumes emil-design-eng + interface-design; includes Motion Decision Framework from Emil Kowalski |
 | Scaleway prototype skill | "Confidently wrong" — rebuilds from scratch | Real failure in Shire monorepo |
 
 **Two personal practices:**

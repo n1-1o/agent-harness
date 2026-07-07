@@ -63,18 +63,19 @@ cd agent-harness
 
 ## What's Included
 
-### Rules (5 + budget guardrail)
+### Rules (6 + budget guardrail)
 
 | Rule | Purpose |
 |------|---------|
 | `plan-first-execution.mdc` | Never execute complex tasks without an approved plan |
 | `caveman.mdc` | Terse output, ~75% fewer tokens |
-| `vision-delegation.mdc` | Delegate image requests to vision-capable subagent |
-| `security-standards.mdc` | Zero-trust, Zod validation, threat modeling |
+| `vision-delegation.mdc` | Delegate image requests to vision-capable subagent; includes Evidence-First Debugging |
+| `security-standards.mdc` | Zero-trust, Zod validation, threat modeling (security-specific ARIA only) |
 | `documentation-conciseness.mdc` | 3-doc max (PRD, DESIGN, README) |
+| `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
 | Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (6 families)
+### Skills (6 active + 3 archived routers)
 
 | Skill | Purpose |
 |-------|---------|
@@ -83,7 +84,10 @@ cd agent-harness
 | `model-router` | Cost-aware model escalation |
 | `product-experts` | Designer/PM/eng lens analysis |
 | `research-market-competitor` | Evidence-backed market scans |
-| `impeccable` | Design-craft delegate |
+| `impeccable` | Design-craft delegate (includes Motion Decision Framework from Emil Kowalski) |
+| *`review`* (archived) | Router → review-bugbot + review-security |
+| *`emil-design-eng`* (archived) | Pointer → impeccable |
+| *`interface-design`* (archived) | Pointer → impeccable |
 
 ### MCPs
 

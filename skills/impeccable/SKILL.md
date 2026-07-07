@@ -47,6 +47,7 @@ One hard typographic ceiling you currently miss:
 - Build a semantic z-index scale (dropdown → sticky → modal-backdrop → modal → toast → tooltip). Never arbitrary values like 999 or 9999.
 
 #### Motion
+
 - Motion should be intentional, and not be an afterthought. consider it as part of the build.
 - Don't animate CSS layout properties unless truly needed.
 - Ease out with exponential curves (ease-out-quart / quint / expo). No bounce, no elastic.
@@ -55,6 +56,49 @@ One hard typographic ceiling you currently miss:
 - Staggering the items within one list is legitimate. The tell is the uniform reflex (one identical entrance applied to every section), not motion itself; each reveal should fit what it reveals. Suppressing the reflex is never a reason to ship a page with no motion at all.
 - Reveal animations must enhance an already-visible default. Don't gate content visibility on a class-triggered transition; transitions pause on hidden tabs and headless renderers, so the reveal never fires and the section ships blank.
 - Premium motion materials are not just transform/opacity. Blur, backdrop-filter, clip-path, mask, and shadow/glow are part of the palette when they materially improve the effect and stay smooth.
+
+#### Motion Decision Framework (from Emil Kowalski)
+
+**1. Should this animate at all?**
+
+| Frequency | Decision |
+|-----------|----------|
+| 100+ times/day (keyboard shortcuts, command palette) | No animation. Ever. |
+| Tens of times/day (hover, list navigation) | Remove or drastically reduce |
+| Occasional (modals, drawers, toasts) | Standard animation |
+| Rare/first-time (onboarding, celebrations) | Can add delight |
+
+**Never animate keyboard-initiated actions.** Raycast has no open/close animation — optimal for something used hundreds of times daily.
+
+**2. What easing?**
+- Entering/exiting → `ease-out` (starts fast, feels responsive)
+- Moving/morphing on screen → `ease-in-out`
+- Hover/color change → `ease`
+- Constant motion (marquee) → `linear`
+
+**Never use `ease-in` for UI.** It starts slow, making interfaces feel sluggish. A dropdown with `ease-in` at 300ms _feels_ slower than `ease-out` at 300ms.
+
+**Use custom easing curves** (CSS built-ins are too weak):
+```css
+--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+```
+
+**3. How fast?**
+
+| Element | Duration |
+|---------|----------|
+| Button press | 100-160ms |
+| Tooltips, small popovers | 125-200ms |
+| Dropdowns, selects | 150-250ms |
+| Modals, drawers | 200-500ms |
+
+**UI animations should stay under 300ms.** A 180ms dropdown feels more responsive than a 400ms one.
+
+**4. Spring animations**
+
+Use springs for: drag interactions with momentum, "alive" elements (Apple Dynamic Island), interruptible gestures, decorative mouse-tracking. Springs simulate real physics — no fixed durations, settle based on physical parameters.
 
 #### Interaction
 

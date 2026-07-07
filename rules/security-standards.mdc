@@ -530,28 +530,7 @@ Support multiple secrets during rotation. Accept both old and new during transit
 
 ## Accessibility Security (WCAG AA)
 
-### Secure Accessibility Patterns
-
-```typescript
-// ✅ GOOD: Accessible and secure
-<button
-  onClick={handleDelete}
-  aria-label="Delete item"
-  disabled={!canDelete}
-  tabIndex={canDelete ? 0 : -1}
->
-  Delete
-</button>
-
-// ❌ BAD: Keyboard trap
-<div onKeyDown={handleKeyDown} tabIndex={0}>
-  {/* Focus cannot escape this element */}
-</div>
-```
-
-### Focus Management in Modals
-
-Trap focus within modals for security and accessibility. Ensure Tab cycles through focusable elements and Escape closes modal.
+**Note:** General a11y standards moved to [`front-end-development.mdc`](./front-end-development.mdc#accessibility-a11y). This section covers security-specific ARIA patterns only.
 
 ### ARIA Security Considerations
 
@@ -562,6 +541,8 @@ Trap focus within modals for security and accessibility. Ensure Tab cycles throu
 // ❌ BAD: Misleading ARIA (security risk for screen reader users)
 <button aria-label="View profile" onClick={handleDelete}>✕</button> // Actually deletes!
 ```
+
+**Focus Management in Modals:** Trap focus within modals for security and accessibility. Ensure Tab cycles through focusable elements and Escape closes modal.
 
 ---
 

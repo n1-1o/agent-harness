@@ -1,0 +1,261 @@
+---
+description: "Front-end development standards for React, Next.js, TypeScript, Tailwind"
+alwaysApply: true
+---
+
+# Front-End Development
+
+## Tech Stack
+- **React** 18+ with TypeScript (no JavaScript-only code)
+- **Next.js** App Router (prefer Server Components)
+- **Styling**: Tailwind CSS + Shadcn UI + Radix UI (no Stylus/CSS modules)
+- **State**: Zustand for global state
+- **Data**: TanStack React Query for server state
+- **Validation**: Zod for schema validation
+- **Testing**: Jest + React Testing Library + Playwright
+
+## Code Style & Structure
+
+### TypeScript & Code Quality
+- Write concise TypeScript with proper types (no `any`)
+- Use functional and declarative patterns; avoid classes
+- Favor iteration and modularization over duplication (DRY)
+- Use descriptive names with auxiliary verbs: `isLoading`, `hasError`, `handleClick`
+- Structure files: exports → subcomponents → helpers → static content → types
+- Directory naming: lowercase with dashes (`components/auth-wizard`)
+- No semicolons (unless required for disambiguation)
+- Use `===` instead of `==`
+
+### Function & Component Patterns
+```typescript
+// Prefer const arrow functions over function declarations
+const handleClick = () => { ... }
+
+// Component with proper typing
+interface ComponentProps {
+  value: string
+  onChange: (value: string) => void
+}
+
+export function Component({ value, onChange }: ComponentProps) {
+  return <div>{value}</div>
+}
+```
+
+## React Best Practices
+
+### Hooks
+- Follow Rules of Hooks (top-level, only in React functions)
+- Use `useCallback` for memoizing functions passed as props
+- Use `useMemo` for expensive computations
+- Use `useEffect` cleanup functions to prevent memory leaks
+- Minimize `useState` and `useEffect`; favor RSC and server state
+- Create custom hooks for reusable component logic
+
+### Components
+- Use functional components with TypeScript interfaces
+- Prefer controlled components over uncontrolled
+- Use `React.memo()` for component memoization when appropriate
+- Avoid inline function definitions in render
+- Prefer composition over inheritance
+- Use children prop and render props for flexible components
+- Implement `React.lazy()` and `Suspense` for code splitting
+- Use refs sparingly (mainly for DOM access)
+- Implement error boundaries for graceful error handling
+
+### Conditional Rendering
+- Use short-circuit evaluation and ternary operators
+- Avoid inline conditionals for complex logic
+- Extract complex conditions to named variables
+
+## Styling Approach
+
+### Tailwind CSS + Shadcn + Radix (No Stylus)
+- **Always use Tailwind classes** for styling; avoid CSS files
+- Use Shadcn UI and Radix UI for component foundations
+- Mobile-first responsive design
+- Never use `@apply` directive
+
+### Class Naming
+```typescript
+// Use class: for conditional classes when possible
+<div className={cn("base-class", isActive && "active-class")} />
+
+// Prefer Tailwind utilities over custom CSS
+<button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded">
+```
+
+### Responsive Design
+```typescript
+// Mobile-first approach
+<div className="w-full md:w-1/2 lg:w-1/4" />
+```
+
+## State Management & Data Fetching
+
+### Global State (Zustand)
+```typescript
+import { create } from 'zustand'
+
+interface Store {
+  count: number
+  increment: () => void
+}
+
+export const useStore = create<Store>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 }))
+}))
+```
+
+### Server State (React Query)
+- Use TanStack React Query for data fetching
+- Avoid `useEffect` for data fetching
+- Leverage caching, background refetch, and optimistic updates
+
+### Form State
+- Use controlled components for form inputs
+- Use `react-hook-form` for complex forms
+- Validate with Zod schemas
+
+## Error Handling
+
+### Early Returns & Guard Clauses
+```typescript
+// Handle errors and edge cases first
+function fetchData(data: Data | null) {
+  if (!data) return null
+  if (!isValid(data)) return null
+  
+  // Happy path last
+  return process(data)
+}
+```
+
+### Error Patterns
+- Use early returns to avoid deeply nested if statements
+- Avoid unnecessary else statements; use if-return pattern
+- Implement guard clauses for preconditions and invalid states
+- Use custom error types for consistent handling
+- Model expected errors as return values in Server Actions
+- Implement proper error logging and user-friendly messages
+
+## Testing
+
+### Unit & Integration Tests
+- Write unit tests with Jest and React Testing Library
+- Implement integration tests for critical user flows
+- Use snapshot testing judiciously
+- Test edge cases and error conditions
+
+### E2E Tests
+- Use Playwright for end-to-end testing
+- Test critical user journeys
+- Include accessibility testing in E2E suite
+
+## Performance Optimization
+
+### React & Next.js
+- Minimize `'use client'`, `useEffect`, and `useState`
+- Favor React Server Components (RSC) and Next.js SSR
+- Wrap client components in Suspense with fallback
+- Use dynamic imports for code splitting
+- Implement route-based code splitting in Next.js
+
+### Images & Assets
+- Use WebP format with size data
+- Implement lazy loading for images
+- Optimize image delivery with Next.js Image component
+
+### Web Vitals
+- Optimize LCP (Largest Contentful Paint)
+- Minimize CLS (Cumulative Layout Shift)
+- Reduce FID (First Input Delay)
+
+## Accessibility (a11y)
+
+### WCAG AA Standards
+- Use semantic HTML elements
+- Implement proper ARIA attributes
+- Ensure keyboard navigation support
+- Add `tabIndex="0"` for interactive elements
+- Include `aria-label` for screen readers
+- Handle both `onClick` and `onKeyDown` for keyboard events
+
+```typescript
+// Accessible interactive element
+<button
+  onClick={handleClick}
+  onKeyDown={handleKeyDown}
+  aria-label="Submit form"
+  tabIndex={0}
+>
+```
+
+### Focus Management in Modals
+Trap focus within modals for security and accessibility. Ensure Tab cycles through focusable elements and Escape closes modal.
+
+### ARIA Security Considerations
+```typescript
+// ✅ GOOD: Accurate ARIA labels
+<button aria-label="Close dialog" onClick={() => setIsOpen(false)}>✕</button>
+
+// ❌ BAD: Misleading ARIA (security risk for screen reader users)
+<button aria-label="View profile" onClick={handleDelete}>✕</button> // Actually deletes!
+```
+
+## Security
+
+### Input Handling
+- Sanitize user inputs to prevent XSS attacks
+- Use `dangerouslySetInnerHTML` sparingly and only with sanitized content
+- Validate all user inputs (client and server-side)
+- Use Zod for schema validation
+
+### Best Practices
+- Implement proper authentication/authorization checks
+- Use HTTPS for all API calls
+- Implement Content Security Policy (CSP)
+- Avoid exposing sensitive data in client bundles
+
+## Internationalization (i18n)
+- Use `react-intl` or `next-i18next` for internationalization
+- Support RTL languages if needed
+- Externalize all user-facing strings
+
+## Key Conventions
+
+### URL State Management
+- Use `nuqs` for URL search parameter state management
+- Keep URL in sync with application state
+
+### Server vs Client Components
+- Limit `'use client'` usage
+- Favor server components and Next.js SSR
+- Use client components only for:
+  - Web API access (localStorage, window, etc.)
+  - Event listeners and interactivity
+  - Browser-specific APIs
+- Avoid client components for data fetching or state management
+
+### Operational Excellence
+- Consider hosting, monitoring, and maintenance implications
+- Document complex logic with concise comments
+- Use JSDoc for public APIs and complex functions
+- Ask for clarification when requirements are ambiguous
+- Discuss trade-offs before implementing
+
+## Commit Messages
+
+Follow Conventional Commits format per [gitlab-workflow.mdc](./gitlab-workflow.mdc):
+- Use conventional commits (feat, fix, chore, docs, refactor, test)
+- Reference GitLab issues with `#<issue-number>`
+- Subject line ≤50 characters, no period, imperative mood
+
+Example:
+```
+feat(auth): add password reset flow
+
+Implement password reset with email verification and token expiration.
+Uses server actions for secure token generation and validation.
+```
