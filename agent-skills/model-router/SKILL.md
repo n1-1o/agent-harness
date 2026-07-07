@@ -1,9 +1,7 @@
 ---
 name: model-router
 description: >
-  Decides which Cursor model to use per task. Routes to glm-5.2 (heavy),
-  qwen3.5-397b-a17b (medium), or qwen3.6-35b-a3b (small) based on task complexity.
-  Trigger: any task start, "which model", "use cheap model", "save tokens".
+  Decides which Cursor model to use per task. Routes to glm-5.2 (heavy, primary), opus (heavy, alt for deep reasoning), qwen3.5-397b-a17b (medium), or qwen3.6-35b-a3b (small) based on task complexity. Preserve high-intelligence models for planning, architecture, and deep reasoning. Trigger: any task start, "which model", "use cheap model", "save tokens".
 ---
 
 # Model Router
@@ -14,19 +12,21 @@ Three tiers. Pick before spawning subagent or starting work.
 
 | Tier | Model | Use for | Avoid for |
 |---|---|---|---|
-| Heavy | glm-5.2 | Architecture, multi-file refactor, DB schema, security review, new feature design | Trivial ops, renames, image analysis |
+| Heavy | glm-5.2 (primary), opus (alt: deep reasoning) | Planning, architecture, multi-file refactor, DB schema, security review, new feature design, threat modeling | Trivial ops, renames, image analysis, single-file edits |
 | Medium | qwen3.5-397b-a17b | Single-feature work, scoped bug fix, 1-2 file edit with logic, doc writing, vision-worker delegation | Architecture, trivial ops |
-| Small | qwen3.6-35b-a3b | Delete file, move file, git add/commit/push, rename, format, lint fix, read-and-summarize | Multi-file, reasoning, design, image analysis |
+| Small | qwen3.6-35b-a3b | Grep, glob, delete file, move file, git add/commit/push, rename, format, lint fix, read-and-summarize | Multi-file, reasoning, design, image analysis |
 
 ## Trigger examples
 
 ### Small tier (qwen3.6-35b-a3b)
+- "grep across repo for usages"
+- "glob for file locations"
 - "delete these 3 files"
 - "move foo.ts to bar/foo.ts"
 - "commit and push"
 - "rename this variable"
 - "format this file"
-- "what does this file do" (single small file)
+- "read one file and summarize"
 
 ### Medium tier (qwen3.5-397b-a17b)
 - "fix the login bug in auth.ts"
@@ -36,6 +36,9 @@ Three tiers. Pick before spawning subagent or starting work.
 - "analyze this screenshot" (delegated to `vision-worker` subagent)
 
 ### Heavy tier (glm-5.2)
+- "plan a multi-step feature"
+- "architect a new system"
+- "threat-model an integration"
 - "redesign the auth flow"
 - "refactor the data layer across 5 files"
 - "review this PR for security"
@@ -48,7 +51,7 @@ When spawning `Task` subagents:
 - `shell` subagent → qwen3.6-35b-a3b (terminal ops, git, file moves)
 - `explore` subagent → qwen3.5-397b-a17b (codebase search, pattern finding)
 - `generalPurpose` subagent → qwen3.5-397b-a17b or glm-5.2 (depends on scope)
-- `bugbot` / `security-review` → glm-5.2 (deep reasoning)
+- `bugbot` / `security-review` → glm-5.2 (primary) or opus (alt for deep reasoning)
 - `vision-worker` → qwen3.5-397b-a17b (image analysis — glm-5.2 cannot read images; see `vision-delegation` rule)
 
 ## Vision delegation rule
@@ -68,6 +71,7 @@ See `vision-delegation.mdc` rule for full delegation protocol. Do NOT route imag
 3. Never de-escalate mid-task (context loss > savings)
 4. After heavy task done → return to medium/small default
 5. Image tasks: always medium tier via `vision-worker`, never escalate to glm-5.2
+6. Preserve high-intelligence models: never route planning/architecture/security to medium or small — these are always heavy tier even if the prompt looks short
 
 ## Budget override
 
@@ -80,5 +84,5 @@ At 100% → stop, switch to Auto/Composer pool (see user-rules-combined.md)
 If your LLM router doesn't expose qwen3.5-397b-a17b / qwen3.6-35b-a3b:
 - Small → GLM 5.1
 - Medium → Auto
-- Heavy → Claude Sonnet or Composer 1.5
+- Heavy → Claude Sonnet, Composer 1.5, or Opus
 - Vision → any vision-capable model if qwen3.5-397b-a17b unavailable

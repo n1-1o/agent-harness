@@ -63,7 +63,7 @@ Those matter — but they're not what this collection is for.
 |-------|------------------|--------|
 | `ai-orchestration` | Serial execution when parallel works | Systems thinker pattern |
 | `knowledge-librarian` | Insight trapped in chat history | Lifelong learning belief |
-| `model-router` | Wasting expensive tokens on cheap work | Frugality |
+| `model-router` | Wasting expensive tokens on cheap work; preserves high-intelligence models for hard tasks | Frugality + model preservation (opus added as heavy-alt for deep reasoning) |
 | `product-experts` + `research-market-competitor` | Building without product context | Product-thinking triad |
 | `impeccable` | Design craft missing | Subsumes emil-design-eng + interface-design; includes Motion Decision Framework from Emil Kowalski |
 | Scaleway prototype skill | "Confidently wrong" — rebuilds from scratch | Real failure in Shire monorepo |
