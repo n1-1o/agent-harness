@@ -36,7 +36,7 @@ From the analysis of 382 transcripts, these 6 principles drive 3-10x better outc
 - Require AI to read files before proposing solutions
 
 **Example:**
-> "here's screenshot of the Scaleway Console quota display to show the AI exactly what UI pattern to reference"
+> "here's screenshot of the console quota display to show the AI exactly what UI pattern to reference"
 
 ---
 
@@ -319,7 +319,7 @@ Can the AI explain WHY for each major decision? Or does it default to "it's comm
 2. AI reads all files, summarizes constraints
 
 3. User deploys multi-agents:
-   - Agent 1: Research (read Scaleway design system docs)
+   - Agent 1: Research (read design system docs)
    - Agent 2: Implementation (QuotaTable component)
    - Agent 3: Implementation (QuotaCard component)
    - Agent 4: Verification (accessibility, responsive checks)

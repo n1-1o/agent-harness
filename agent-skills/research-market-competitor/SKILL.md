@@ -99,7 +99,7 @@ Normalize comparisons so they are apples to apples:
 
 ### 5. Analyze with product experts
 
-After the evidence is gathered and summarized, read and apply the product-experts skill at `/Users/nguyentran-ngo/.cursor/skills/product-experts/SKILL.md`.
+After the evidence is gathered and summarized, read and apply the product-experts skill at `~/.cursor/skills/product-experts/SKILL.md` (or the equivalent path in your agent harness).
 
 Use it to interpret the research from:
 
