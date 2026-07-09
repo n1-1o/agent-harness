@@ -52,17 +52,7 @@ When spawning `Task` subagents:
 - `explore` subagent → qwen3.5-397b-a17b (codebase search, pattern finding)
 - `generalPurpose` subagent → qwen3.5-397b-a17b or glm-5.2 (depends on scope)
 - `bugbot` / `security-review` → glm-5.2 (primary) or opus (alt for deep reasoning)
-- `vision-worker` → qwen3.5-397b-a17b (image analysis — glm-5.2 cannot read images; see `vision-delegation` rule)
-
-## Vision delegation rule
-
-**glm-5.2 has no image capability.** Any task involving images (screenshots, mockups, wireframes, renders, diagrams) must delegate the image-analysis step to `vision-worker` subagent (qwen3.5-397b-a17b). Triggered by:
-- Image file attached (png/jpg/jpeg/webp/gif/bmp/svg)
-- User references image, screenshot, mockup, wireframe, render, diagram
-- User says "look at this", "describe this", "implement this design", "fix this UI"
-- Image path appears in conversation
-
-See `vision-delegation.mdc` rule for full delegation protocol. Do NOT route image tasks to glm-5.2 directly.
+- `vision-worker` → qwen3.5-397b-a17b (image analysis — glm-5.2 has no image capability; see `vision-delegation` rule)
 
 ## Escalation rules
 
