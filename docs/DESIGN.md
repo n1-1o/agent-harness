@@ -65,17 +65,13 @@ Loaded on demand. Each skill = compressed lesson from past work.
 
 Parallel probabilistic workers, scoped by deterministic prompts.
 
-| Subagent | Role |
-|----------|------|
-| `explore` | Read-only codebase discovery |
-| `shell` | Terminal operations |
-| `browser-use` | Web automation |
-| `generalPurpose` | Multi-file implementation |
-| `bugbot` | Code review |
-| `security-review` | Security audit |
-| `vision-worker` | Image analysis |
-| `best-of-n-runner` | Parallel attempts |
-| `ci-investigator` | CI failure root cause |
+| Subagent | Role | Origin |
+|----------|------|--------|
+| `bugbot` | Code review | Custom skill: `review-bugbot` |
+| `security-review` | Security audit | Custom skill: `review-security` |
+| `vision-worker` | Image analysis | Custom rule: `vision-delegation` |
+
+Cursor provides six native workers (`explore`, `shell`, `browser-use`, `generalPurpose`, `best-of-n-runner`, `ci-investigator`) — the harness adds methodology on top of the three custom ones above.
 
 **On the loop vs in the loop:** in-the-loop = review every result (doesn't scale); on-the-loop = maintain the harness, let it handle volume.
 
