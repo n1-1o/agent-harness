@@ -54,11 +54,8 @@ Loaded on demand. Each skill = compressed lesson from past work.
 | `model-router` | Wasting expensive tokens on cheap work |
 | `product-experts` + `research-market-competitor` | Building without product context |
 | `impeccable` | Design craft missing |
-
-**Personal practices:**
-1. Agents build internal rubric to grade their own answers; only surface the best.
-2. Agents report degree of confidence with citable sources and verbatims.
-3. Agents clarify prompts before executing — surfaces unseen opportunities (3× quality improvement).
+| `internal-rubric` | Presenting unverified answers; confidence scoring, source verification |
+| `prompt-clarifier` | Acting on unclear intent; surfaces unseen opportunities, 3× quality improvement |
 
 ---
 

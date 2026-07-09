@@ -50,7 +50,7 @@ cd agent-harness
 | `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
 | Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (6 active + 3 archived routers)
+### Skills (8 active + 3 archived routers)
 
 | Skill | Purpose |
 |-------|---------|
@@ -60,6 +60,8 @@ cd agent-harness
 | `product-experts` | Designer/PM/eng lens analysis |
 | `research-market-competitor` | Evidence-backed market scans |
 | `impeccable` | Design-craft delegate (includes Motion Decision Framework from Emil Kowalski) |
+| `internal-rubric` | Grade own answers before presenting; confidence scoring, source verification |
+| `prompt-clarifier` | Clarify intent before executing; surfaces unseen opportunities, 3× quality improvement |
 | *`review`* (archived) | Router → review-bugbot + review-security |
 | *`emil-design-eng`* (archived) | Pointer → impeccable |
 | *`interface-design`* (archived) | Pointer → impeccable |
