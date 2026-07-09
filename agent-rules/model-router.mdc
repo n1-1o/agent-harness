@@ -1,14 +1,13 @@
 ---
-name: model-router
-description: >
-  Decides which Cursor model to use per task. Routes to glm-5.2 (heavy, primary), opus (heavy, alt for deep reasoning), qwen3.5-397b-a17b (medium), or qwen3.6-35b-a3b (small) based on task complexity. Preserve high-intelligence models for planning, architecture, and deep reasoning. Trigger: any task start, "which model", "use cheap model", "save tokens".
+description: "Cost-aware model routing — route tasks to the right model tier. Preserve high-intelligence models for planning, architecture, and deep reasoning. Prevents wasting expensive tokens on cheap work."
+alwaysApply: true
 ---
 
 # Model Router
 
-Three tiers. Pick before spawning subagent or starting work.
+Decides which Cursor model to use per task based on complexity. Cheap-but-capable models handle routine work; heavy models (glm-5.2, opus) take planning, architecture, security, and deep reasoning.
 
-## Decision table
+## Decision Table
 
 | Tier | Model | Use for | Avoid for |
 |---|---|---|---|
@@ -16,7 +15,7 @@ Three tiers. Pick before spawning subagent or starting work.
 | Medium | qwen3.5-397b-a17b | Single-feature work, scoped bug fix, 1-2 file edit with logic, doc writing, vision-worker delegation | Architecture, trivial ops |
 | Small | qwen3.6-35b-a3b | Grep, glob, delete file, move file, git add/commit/push, rename, format, lint fix, read-and-summarize | Multi-file, reasoning, design, image analysis |
 
-## Trigger examples
+## Trigger Examples
 
 ### Small tier (qwen3.6-35b-a3b)
 - "grep across repo for usages"
@@ -45,7 +44,7 @@ Three tiers. Pick before spawning subagent or starting work.
 - "design the API schema for the new feature"
 - "debug this race condition"
 
-## Subagent routing
+## Subagent Routing
 
 When spawning `Task` subagents:
 - `shell` subagent → qwen3.6-35b-a3b (terminal ops, git, file moves)
@@ -54,7 +53,7 @@ When spawning `Task` subagents:
 - `bugbot` / `security-review` → glm-5.2 (primary) or opus (alt for deep reasoning)
 - `vision-worker` → qwen3.5-397b-a17b (image analysis — glm-5.2 has no image capability; see `vision-delegation` rule)
 
-## Escalation rules
+## Escalation Rules
 
 1. Start at tier matching task's apparent complexity
 2. If model fails twice or returns "I can't" → escalate one tier
@@ -63,13 +62,13 @@ When spawning `Task` subagents:
 5. Image tasks: always medium tier via `vision-worker`, never escalate to glm-5.2
 6. Preserve high-intelligence models: never route planning/architecture/security to medium or small — these are always heavy tier even if the prompt looks short
 
-## Budget override
+## Budget Override
 
 At 75% monthly budget → force small tier for everything except security/destructive ops
 At 90% → small tier only, no exceptions except user explicit
-At 100% → stop, switch to Auto/Composer pool (see user-rules-combined.md)
+At 100% → stop, switch to Auto/Composer pool
 
-## Legacy fallback
+## Legacy Fallback
 
 If your LLM router doesn't expose qwen3.5-397b-a17b / qwen3.6-35b-a3b:
 - Small → GLM 5.1

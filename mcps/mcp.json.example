@@ -1,15 +1,30 @@
 {
   "mcpServers": {
-    "Figma": {
-      "url": "https://mcp.figma.com/mcp",
-      "headers": {}
+    "figma": {
+      "command": "npx",
+      "args": ["@figma/mcp"],
+      "env": {
+        "FIGMA_API_KEY": "your-figma-api-key"
+      }
     },
     "vercel": {
-      "url": "https://mcp.vercel.com"
+      "command": "npx",
+      "args": ["@vercel/mcp"],
+      "env": {
+        "VERCEL_TOKEN": "your-vercel-token"
+      }
+    },
+    "gitlab": {
+      "command": "npx",
+      "args": ["@gitlab/mcp"],
+      "env": {
+        "GITLAB_TOKEN": "your-gitlab-token",
+        "GITLAB_URL": "https://gitlab.com"
+      }
     },
     "browser-tools": {
       "command": "npx",
-      "args": ["-y", "@agentdeskai/browser-tools-mcp@latest"]
+      "args": ["browser-tools-mcp"]
     }
   }
 }

@@ -1,0 +1,42 @@
+---
+description: "Prevents cost escapes in Cursor Pro plans. At 75% spend → WARNING, 90% → CRITICAL, 100% → STOP. The win is context selection, not volume."
+alwaysApply: true
+---
+
+# Token Budget Guardrail
+
+Prevents cost escapes in Cursor Pro plans. The win is context selection, not volume.
+
+## Thresholds
+
+| Spend | Action |
+|---|---|
+| $15 spent (75%) | ⚠️ WARNING — curtail non-essential tasks |
+| $18 spent (90%) | 🚨 CRITICAL — stop exploratory work |
+| $20 spent (100%) | ❌ STOP — switch to Auto/Composer pool or upgrade plan |
+
+## Budget Controls
+
+- **Prefer Auto/Composer pool** for 90% of requests (doesn't count toward $20 API limit)
+- **Auto pricing**: $1.25 input, $6 output per 1M tokens
+- **Composer 1.5**: $3.5 input, $17.5 output per 1M tokens
+- **Claude Sonnet 4.5**: $3 input, $15 output per 1M tokens — reserve for critical tasks only
+
+## Cost Reduction Tactics
+
+1. Use `Cmd+K` for small local edits (rename, extract, small UI/CSS)
+2. Use direct tool calls for simple tasks — skip subagents
+3. Batch parallel tool calls in single messages
+4. Skip `ReadLints` unless substantive edits were made
+5. Use `model: "fast"` for Task tool when appropriate
+6. Close irrelevant files to reduce context
+
+## Monitor Usage
+
+Check usage at: https://cursor.com/dashboard?tab/usage
+
+Alert when approaching thresholds (75%, 90%, 100%).
+
+---
+
+*This guardrail prevents cost escapes — the harness can't function if the API budget is depleted mid-session.*

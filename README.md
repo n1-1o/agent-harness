@@ -38,41 +38,44 @@ cd agent-harness
 
 ## What's Included
 
-### Rules (6 + budget guardrail)
+### Rules (7 + budget guardrail)
 
-| Rule | Purpose |
-|------|---------|
-| `plan-first-execution.mdc` | Never execute complex tasks without an approved plan |
-| `caveman.mdc` | Terse output, ~75% fewer tokens |
-| `vision-delegation.mdc` | Delegate image requests to vision-capable subagent; includes Evidence-First Debugging |
-| `security-standards.mdc` | Zero-trust, Zod validation, threat modeling (security-specific ARIA only) |
-| `documentation-conciseness.mdc` | 3-doc max (PRD, DESIGN, README) |
-| `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
-| Token-budget guardrail | $20 Pro cap thresholds |
+|| Rule | Purpose |
+||------|---------|
+|| `plan-first-execution.mdc` | Never execute complex tasks without an approved plan |
+|| `caveman.mdc` | Terse output, ~75% fewer tokens |
+|| `model-router.mdc` | Cost-aware model routing — preserve high-intelligence models for hard work |
+|| `vision-delegation.mdc` | Delegate image requests to vision-capable subagent; includes Evidence-First Debugging |
+|| `security-standards.mdc` | Zero-trust, Zod validation, threat modeling |
+|| `documentation-conciseness.mdc` | 3-doc max, reference-over-repeat |
+|| `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
+|| Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (10 active)
+### Skills (12 active)
 
-| Skill | Purpose |
-|-------|---------|
-| `ai-orchestration` | Multi-agent coordination |
-| `knowledge-librarian` | Turn raw material into reusable notes |
-| `model-router` | Cost-aware model escalation |
-| `product-experts` | Designer/PM/eng lens analysis |
-| `research-market-competitor` | Evidence-backed market scans |
-| `impeccable` | Design-craft delegate (includes Motion Decision Framework from Emil Kowalski) |
-| `internal-rubric` | Grade own answers before presenting; confidence scoring, source verification |
-| `prompt-clarifier` | Clarify intent before executing; surfaces unseen opportunities, 3× quality improvement |
-| `review-bugbot` | Code review: catches bugs, regressions, performance issues |
-| `review-security` | Security review: OWASP Top 10, auth/XSS/SQL injection checks |
+|| Skill | Purpose |
+||-------|---------|
+|| `ai-orchestration` | Multi-agent coordination; orchestrating the orchestrator |
+|| `knowledge-librarian` | Turn raw material into reusable notes; execution traces as improvement data |
+|| `product-experts` | Designer/PM/eng lens analysis |
+|| `research-market-competitor` | Evidence-backed market scans |
+|| `impeccable` | Design-craft delegate (includes Motion Decision Framework from [pbakaus/impeccable](https://github.com/pbakaus/impeccable)) |
+|| `internal-rubric` | Grade own answers before presenting; confidence scoring, source verification |
+|| `prompt-clarifier` | Clarify intent before executing; surfaces unseen opportunities, 3× quality improvement |
+|| `review-bugbot` | Code review: catches bugs, regressions, performance issues |
+|| `review-security` | Security review: OWASP Top 10, auth/XSS/SQL injection checks |
+|| `webapp-testing` | E2E testing with Playwright; pre-release quality gates |
+|| `accesslint` | WCAG 2.2 accessibility audit and fixes |
+|| `design-system-enforcement` | Forces real design system components — no fake components, no rebuilding from scratch |
 
 ### MCPs
 
-| MCP | Purpose |
-|-----|---------|
-| Figma | Design ↔ code bridge |
-| Vercel | Deployments, observability |
-| GitLab | Issues, MRs, CI |
-| Browser layer | In-IDE tab + raw CDP |
+|| MCP | Purpose |
+||-----|---------|
+|| Figma | Design ↔ code bridge |
+|| Vercel | Deployments, observability |
+|| GitLab | Issues, MRs, CI |
+|| Browser layer | In-IDE tab + raw CDP |
 
 See [`mcps/README.md`](mcps/README.md) for setup.
 
@@ -115,6 +118,7 @@ This harness is built by a designer who builds. It's tuned for:
 - **Product thinking**: `product-experts`, `research-market-competitor`, plan-first framing
 - **Orchestration**: `ai-orchestration`, multi-agent coordination, on-the-loop patterns
 - **Compound knowledge**: `knowledge-librarian`, execution traces, rubric-based grading
+- **Shift-left verification**: `webapp-testing`, `accesslint`, `design-system-enforcement`
 
 Not tuned for:
 
@@ -174,9 +178,9 @@ MIT — use it, fork it, make it your own.
 
 ## Related
 
-- Medium article: `work/Content/medium-agent-harness-stack.md`
-- LinkedIn teaser: `work/Content/linkedin-agent-harness-teaser.md`
-- Pattern note: `Knowledge/Patterns/pattern-agent-harness-4-layer.md`
+- Medium article: [Agent Harness for Designers and Builders](../work/Content/medium-agent-harness-stack.md)
+- LinkedIn teaser: [My Agent Harness](../work/Content/linkedin-agent-harness-teaser.md)
+- Pattern note: [Agent Harness — Four-Layer System](../knowledge/patterns/pattern-agent-harness-4-layer.md)
 
 ---
 
