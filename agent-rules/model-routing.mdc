@@ -1,0 +1,108 @@
+---
+description: "Route tasks to appropriate model tier (heavy/medium/small) based on complexity. Enforce budget constraints."
+alwaysApply: true
+---
+
+# Model Routing
+
+Three tiers. Pick before spawning subagent or starting work.
+
+## Decision Table
+
+| Tier | Model | Use for | Avoid for |
+|------|-------|---------|-----------|
+| Heavy | glm-5.2 (primary), opus (alt: deep reasoning) | Planning, architecture, multi-file refactor, DB schema, security review, new feature design, threat modeling | Trivial ops, renames, image analysis, single-file edits |
+| Medium | qwen3.5-397b-a17b | Single-feature work, scoped bug fix, 1-2 file edit with logic, doc writing, vision-worker delegation | Architecture, trivial ops |
+| Small | qwen3.6-35b-a3b | Grep, glob, delete file, move file, git add/commit/push, rename, format, lint fix, read-and-summarize | Multi-file, reasoning, design, image analysis |
+
+## Trigger Examples
+
+### Small Tier (qwen3.6-35b-a3b)
+
+- "grep across repo for usages"
+- "glob for file locations"
+- "delete these 3 files"
+- "move foo.ts to bar/foo.ts"
+- "commit and push"
+- "rename this variable"
+- "format this file"
+- "read one file and summarize"
+
+### Medium Tier (qwen3.5-397b-a17b)
+
+- "fix the login bug in auth.ts"
+- "add validation to the form component"
+- "write a README for this module"
+- "refactor this function to use hooks"
+- "analyze this screenshot" (delegated to `vision-worker` subagent)
+
+### Heavy Tier (glm-5.2)
+
+- "plan a multi-step feature"
+- "architect a new system"
+- "threat-model an integration"
+- "redesign the auth flow"
+- "refactor the data layer across 5 files"
+- "review this PR for security"
+- "design the API schema for the new feature"
+- "debug this race condition"
+
+## Subagent Routing
+
+When spawning `Task` subagents:
+
+| Subagent | Model | Rationale |
+|----------|-------|-----------|
+| `shell` | qwen3.6-35b-a3b | Terminal ops, git, file moves |
+| `explore` | qwen3.5-397b-a17b | Codebase search, pattern finding |
+| `generalPurpose` | qwen3.5-397b-a17b or glm-5.2 | Depends on scope |
+| `bugbot` / `security-review` | glm-5.2 (primary) or opus (alt) | Deep reasoning for reviews |
+| `vision-worker` | qwen3.5-397b-a17b | Image analysis — glm-5.2 cannot read images |
+
+## Vision Delegation Requirements
+
+**glm-5.2 has no image capability.** Any task involving images (screenshots, mockups, wireframes, renders, diagrams) must delegate the image-analysis step to `vision-worker` subagent (qwen3.5-397b-a17b).
+
+**Triggered by:**
+- Image file attached (png/jpg/jpeg/webp/gif/bmp/svg)
+- User references image, screenshot, mockup, wireframe, render, diagram
+- User says "look at this", "describe this", "implement this design", "fix this UI"
+- Image path appears in conversation
+
+**Do NOT route image tasks to glm-5.2 directly.**
+
+See `vision-delegation.mdc` rule for full delegation protocol.
+
+## Budget Override Thresholds
+
+| Budget Level | Action |
+|--------------|--------|
+| 75% ($15 spent) | Force small tier for everything except security/destructive ops |
+| 90% ($18 spent) | Small tier only, no exceptions except user explicit |
+| 100% ($20 spent) | Stop, switch to Auto/Composer pool |
+
+See `token-budget-guardrail.mdc` for full budget management details.
+
+## Escalation Rules
+
+1. Start at tier matching task's apparent complexity
+2. If model fails twice or returns "I can't" → escalate one tier
+3. Never de-escalate mid-task (context loss > savings)
+4. After heavy task done → return to medium/small default
+5. Image tasks: always medium tier via `vision-worker`, never escalate to glm-5.2
+6. Preserve high-intelligence models: never route planning/architecture/security to medium or small — these are always heavy tier even if the prompt looks short
+
+## Legacy Fallback
+
+If your LLM router doesn't expose qwen3.5-397b-a17b / qwen3.6-35b-a3b:
+
+| Original | Fallback |
+|----------|----------|
+| Small (qwen3.6-35b-a3b) | GLM 5.1 |
+| Medium (qwen3.5-397b-a17b) | Auto |
+| Heavy (glm-5.2) | Claude Sonnet, Composer 1.5, or Opus |
+| Vision | Any vision-capable model if qwen3.5-397b-a17b unavailable |
+
+---
+
+*This rule is enforced by default. Use the `model-router` skill when user explicitly asks about model selection or wants to override automatic routing.*
