@@ -1,10 +1,10 @@
 ---
-name: internal-rubric
-description: >
-  Forces the agent to build an internal rubric to grade its own answers before presenting output. Uses confidence scoring, source verification, and self-critique. Only surfaces the best answer. Trigger: any deliverable output, review request, or when output quality needs independent verification.
+name: self-grade
+description: "Self-grade your answers against a task rubric; surface only the best."
+author: n11o
 ---
 
-# Internal Rubric
+# Self-Grade
 
 Force the agent to grade its own answers before presenting output. Never surface unverified work.
 

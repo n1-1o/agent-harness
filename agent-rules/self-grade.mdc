@@ -1,0 +1,36 @@
+---
+description: "When task needs depth, draft several answers, self-grade against a rubric, surface best."
+alwaysApply: true
+---
+
+# Self-Grade (Automatic)
+
+Fire this when a task signals it needs careful, deep thinking. Draft several candidate answers, grade them against a task rubric, surface only the best.
+
+**Read first:** `agent-skills/self-grade/SKILL.md` — the shared procedure.
+
+## When it fires (signal gates)
+
+**Strong (always fire):**
+- User invokes `/self-grade` or says "best of n", "several answers", "grade", "rubric", "pros/cons", "options", "pick the best"
+- Task is explicitly deep / "think carefully"
+
+**Medium (fire only if genuinely consequential):**
+- Ambiguous scope, irreversible choice, security/architecture tradeoffs, multi-file design decision
+
+**Skip (no rubric):**
+- Rename, quick fix, single-line edit, trivially resolvable from code or an obvious default
+
+## Procedure
+
+1. Read `agent-skills/self-grade/SKILL.md`
+2. Build a task-specific rubric (3-5 weighted criteria tied to the user's goal)
+3. Draft 2-3 genuinely distinct candidate answers
+4. Grade each against the rubric
+5. Surface the best, with a one-line verdict (candidates, winner, why) and confidence
+
+## Guardrails
+
+- Never tune the rubric after seeing the answer — defining criteria first is what makes grading honest
+- 2-3 candidates is enough; more burns tokens without changing the winner
+- Don't bloat trivial tasks — if it's not deep, skip and answer normally (frugality wins)

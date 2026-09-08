@@ -54,7 +54,7 @@ Loaded on demand. Each skill = compressed lesson from past work.
 | `model-router` | Wasting expensive tokens on cheap work |
 | `product-experts` + `research-market-competitor` | Building without product context |
 | `impeccable` | Design craft missing |
-| `internal-rubric` | Presenting unverified answers; confidence scoring, source verification |
+| `self-grade` + `agent-rules/self-grade.mdc` | Presenting unverified answers; build a task rubric, draft N candidates, surface best |
 | `prompt-clarifier` | Acting on unclear intent; surfaces unseen opportunities, 3× quality improvement |
 | `review-bugbot` | Shipping code without structured review; catches bugs, regressions, performance issues |
 | `review-security` | Security gaps in auth, input validation, secrets; OWASP Top 10 checks |

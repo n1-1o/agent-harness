@@ -38,7 +38,7 @@ cd agent-harness
 
 ## What's Included
 
-### Rules (7 + budget guardrail)
+### Rules (8 + budget guardrail)
 
 || Rule | Purpose |
 ||------|---------|
@@ -49,6 +49,7 @@ cd agent-harness
 || `security-standards.mdc` | Zero-trust, Zod validation, threat modeling |
 || `documentation-conciseness.mdc` | 3-doc max, reference-over-repeat |
 || `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
+|| `self-grade.mdc` | When task needs depth, draft N answers, self-grade, surface best |
 || Token-budget guardrail | $20 Pro cap thresholds |
 
 ### Skills (12 active)
@@ -60,7 +61,7 @@ cd agent-harness
 || `product-experts` | Designer/PM/eng lens analysis |
 || `research-market-competitor` | Evidence-backed market scans |
 || `impeccable` | Design-craft delegate (includes Motion Decision Framework from [pbakaus/impeccable](https://github.com/pbakaus/impeccable)) |
-|| `internal-rubric` | Grade own answers before presenting; confidence scoring, source verification |
+|| `self-grade` | Draft several answers, grade own against a task rubric, surface best; confidence + sources |
 || `prompt-clarifier` | Clarify intent before executing; surfaces unseen opportunities, 3× quality improvement |
 || `review-bugbot` | Code review: catches bugs, regressions, performance issues |
 || `review-security` | Security review: OWASP Top 10, auth/XSS/SQL injection checks |
