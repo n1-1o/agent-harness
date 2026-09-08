@@ -52,7 +52,7 @@ cd agent-harness
 || `self-grade.mdc` | When task needs depth, draft N answers, self-grade, surface best |
 || Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (12 active)
+### Skills (18 active)
 
 || Skill | Purpose |
 ||-------|---------|
@@ -68,6 +68,12 @@ cd agent-harness
 || `webapp-testing` | E2E testing with Playwright; pre-release quality gates |
 || `accesslint` | WCAG 2.2 accessibility audit and fixes |
 || `design-system-enforcement` | Forces real design system components — no fake components, no rebuilding from scratch |
+|| `caveman-commit` | Ultra-compressed Conventional Commits; terse subjects, body only for the why |
+|| `caveman-review` | Bug-focused code review; one finding per line with severity emoji |
+|| `caveman-stats` | Session token usage + context budget estimate |
+|| `cavecrew` | When to delegate subagents with compressed output contracts |
+|| `caveman-help` | Cheat sheet for caveman modes and sibling skills |
+|| `compress` | Snapshots session state to persistent session-notes.md before compaction |
 
 ### MCPs
 
