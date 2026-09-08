@@ -50,9 +50,10 @@ cd agent-harness
 || `documentation-conciseness.mdc` | 3-doc max, reference-over-repeat |
 || `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
 || `self-grade.mdc` | When task needs depth, draft N answers, self-grade, surface best |
+|| `karpathy-thinking.mdc` | Thinking discipline: think first, simplicity, surgical changes, goal-driven |
 || Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (18 active)
+### Skills (20 active)
 
 || Skill | Purpose |
 ||-------|---------|
@@ -74,6 +75,8 @@ cd agent-harness
 || `cavecrew` | When to delegate subagents with compressed output contracts |
 || `caveman-help` | Cheat sheet for caveman modes and sibling skills |
 || `compress` | Snapshots session state to persistent session-notes.md before compaction |
+|| `eli5` | Explains topics simply with analogies and recap tables |
+|| `model-router` | Decides which Cursor model to use per task by complexity tier |
 
 ### MCPs
 

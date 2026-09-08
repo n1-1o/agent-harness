@@ -1,0 +1,158 @@
+---
+description: "Karpathy's 4 thinking principles — disciplined reasoning before and during coding"
+alwaysApply: true
+---
+
+# Karpathy's 4 Thinking Principles
+
+Apply these principles BEFORE and DURING all coding tasks. Focus on thinking discipline, not output style.
+
+## 1. Think Before Coding
+
+**Don't assume. Surface confusion. Present tradeoffs.**
+
+- State assumptions explicitly — if uncertain, ask rather than guess
+- If multiple interpretations exist, present them all — don't pick silently
+- Push back when a simpler approach exists
+- Stop and name what's unclear before implementing
+
+**Example: Hidden vs surfaced assumptions**
+
+BAD (hidden assumptions):
+```
+User: "Add caching to the dashboard"
+→ Immediately implements Redis caching with 200 lines of infrastructure code
+```
+
+GOOD (surfaced assumptions):
+```
+User: "Add caching to the dashboard"
+→ Clarifies: "Three options:
+  1. React Query client-side (5 lines, no infra)
+  2. Next.js ISR (revalidate per request, no infra)
+  3. Redis server-side (infra required, shared across users)
+  Which matches your use case?"
+```
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked
+- No abstractions for single-use code
+- No "flexibility" or "configurability" that wasn't requested
+- No error handling for impossible scenarios
+- If you write 200 lines and it could be 50, rewrite it
+
+**Example: Overengineered vs simple**
+
+BAD (overengineered):
+```typescript
+// User: "Add a toggle button"
+interface ToggleConfig {
+  initialState: boolean
+  onToggle: (state: boolean) => void
+  disabled?: boolean
+  theme?: 'light' | 'dark'
+  animationDuration?: number
+}
+
+class ToggleManager {
+  private config: ToggleConfig
+  constructor(config: ToggleConfig) { /* ... */ }
+  // 150 lines of abstraction
+}
+```
+
+GOOD (simple):
+```typescript
+// User: "Add a toggle button"
+function Toggle({ checked, onChange }) {
+  return (
+    <button onClick={() => onChange(!checked)}>
+      {checked ? 'On' : 'Off'}
+    </button>
+  )
+}
+// 5 lines. Done.
+```
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+- Don't "improve" adjacent code, formatting, or style
+- Match existing style, even if you'd do it differently
+- Every changed line should trace directly to the request
+- Remove only your own orphaned code
+
+**Example: Drive-by refactoring vs surgical fix**
+
+BAD (drive-by refactoring):
+```
+User: "Fix the null check on line 42"
+→ Changes 15 lines across 3 files:
+  - Fixes null check (requested)
+  - Renames variables for "clarity" (unrequested)
+  - Extracts helper function (unrequested)
+  - Updates comments (unrequested)
+```
+
+GOOD (surgical):
+```
+User: "Fix the null check on line 42"
+→ Changes 1 line:
+  - if (user) → if (user != null)
+  - Matches surrounding style
+  - No other modifications
+```
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform vague tasks into verifiable outcomes:
+
+| Instead of... | Transform to... |
+|---|---|
+| "Add validation" | "Write tests for invalid inputs, then make them pass" |
+| "Fix the bug" | "Write a test that reproduces it, then make it pass" |
+| "Refactor X" | "Ensure all tests pass before and after" |
+| "Improve performance" | "Reduce load time from 2s to 500ms, measure with Lighthouse" |
+
+For multi-step tasks, state brief plan with verification:
+
+```
+1. Reproduce bug → verify: failing test exists
+2. Implement fix → verify: test passes
+3. Check regressions → verify: all other tests still pass
+```
+
+---
+
+## When to Apply
+
+**Always apply for:**
+- Bug fixes (reproduce first, then fix)
+- Feature additions (clarify scope, then implement)
+- Refactoring (define success criteria, verify before/after)
+- Code reviews (check for violations before merging)
+
+**Can relax for:**
+- Trivial typos
+- Obvious one-liners
+- Emergency hotfixes (document assumptions post-hoc)
+
+---
+
+## Integration with Caveman Mode
+
+This rule governs THINKING discipline (before/during coding).
+The existing `caveman.mdc` rule governs OUTPUT style (after coding).
+
+Use both together:
+1. Think with Karpathy principles (karpathy-thinking.mdc)
+2. Communicate with caveman style (caveman.mdc)
+3. Code with surgical precision (both files)
+
+Result: Clear reasoning + terse output + minimal changes.
