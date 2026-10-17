@@ -53,7 +53,7 @@ cd agent-harness
 || `karpathy-thinking.mdc` | Thinking discipline: think first, simplicity, surgical changes, goal-driven |
 || Token-budget guardrail | $20 Pro cap thresholds |
 
-### Skills (20 active)
+### Skills (21 active)
 
 || Skill | Purpose |
 ||-------|---------|
@@ -64,6 +64,7 @@ cd agent-harness
 || `impeccable` | Design-craft delegate (includes Motion Decision Framework from [pbakaus/impeccable](https://github.com/pbakaus/impeccable)) |
 || `self-grade` | Draft several answers, grade own against a task rubric, surface best; confidence + sources |
 || `prompt-clarifier` | Clarify intent before executing; surfaces unseen opportunities, 3× quality improvement |
+|| `swe` | Code review first, cleanup second: correctness, structure/maintainability, dead code. One command. |
 || `review-bugbot` | Code review: catches bugs, regressions, performance issues |
 || `review-security` | Security review: OWASP Top 10, auth/XSS/SQL injection checks |
 || `webapp-testing` | E2E testing with Playwright; pre-release quality gates |

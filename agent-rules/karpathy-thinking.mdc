@@ -44,6 +44,17 @@ User: "Add caching to the dashboard"
 - No error handling for impossible scenarios
 - If you write 200 lines and it could be 50, rewrite it
 
+**The laziness ladder.** Before writing code, stop at the first rung that holds:
+1. Does this need to exist at all?
+2. Is it already in this codebase? (reuse it)
+3. Does the standard library do it?
+4. Is there a native platform feature?
+5. Is there an installed dependency?
+6. Can it be one line?
+7. Only then: the minimum that works.
+
+**Lazy, not negligent.** Never cut trust-boundary validation, error handling, security, or accessibility. The code is small because it is necessary, not golfed.
+
 **Example: Overengineered vs simple**
 
 BAD (overengineered):
@@ -127,6 +138,12 @@ For multi-step tasks, state brief plan with verification:
 2. Implement fix → verify: test passes
 3. Check regressions → verify: all other tests still pass
 ```
+
+**Three sharper principles folded in:**
+
+- **Prove it works.** Verify against the real artifact — run the feature, read the actual value, inspect the diff. Never a proxy, a self-report, or "it compiles."
+- **Attack the premise.** When two or more fixes sharing one premise have failed the same gate, write the premise down and test it directly before writing another fix that assumes it.
+- **Subtract before you add.** Remove dead weight, redundant validators, and stub references first, then build on the simpler base.
 
 ---
 

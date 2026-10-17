@@ -20,7 +20,7 @@ Activate: say "caveman", "caveman ultra", etc. Deactivate: "stop caveman".
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
 | **caveman-commit** | `/caveman-commit` | Terse commit messages. Conventional Commits. ≤50 char subject. |
-| **caveman-review** | `/caveman-review` | Code review. One finding per line: `path:line: 🔴 severity: problem. fix.` |
+| **caveman-review** | `/caveman-review` | ⚠️ **Deprecated** → use `/swe` (code review + cleanup). Stub retained for routing. |
 | **caveman-stats** | `/caveman-stats` | Token usage estimate + context budget recommendation. |
 | **cavecrew** | `/cavecrew` | Subagent delegation guide with compressed output contracts. |
 | **caveman-help** | `/caveman-help` | This card. |

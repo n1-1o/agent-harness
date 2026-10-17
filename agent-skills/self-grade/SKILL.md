@@ -24,22 +24,22 @@ Before presenting any significant output, the agent must:
 
 ## Rubric Example (generic)
 
-| Criterion | Weight | Score (1-5) | Evidence |
-|---|---|---|---|
-| Correctness | 30% | 5 | [source] |
-| Completeness | 25% | 4 | [reasoning] |
-| Fit for context | 25% | 4 | [comparison] |
-| Edge cases covered | 20% | 3 | [gap identified] |
+| Criterion          | Weight | Score (1-5) | Evidence         |
+| ------------------ | ------ | ----------- | ---------------- |
+| Correctness        | 30%    | 5           | [source]         |
+| Completeness       | 25%    | 4           | [reasoning]      |
+| Fit for context    | 25%    | 4           | [comparison]     |
+| Edge cases covered | 20%    | 3           | [gap identified] |
 
 **Minimum threshold:** weighted average ≥ 4.0 to present. Below that, revise.
 
 ## Confidence Scoring
 
-| Level | Meaning |
-|---|---|
-| High | Multiple sources confirm, no known gaps |
-| Medium | Some sources, one or more gaps identified |
-| Low | Speculative, or sources conflict, or insufficient data |
+| Level  | Meaning                                                |
+| ------ | ------------------------------------------------------ |
+| High   | Multiple sources confirm, no known gaps                |
+| Medium | Some sources, one or more gaps identified              |
+| Low    | Speculative, or sources conflict, or insufficient data |
 
 ## Output Format
 
