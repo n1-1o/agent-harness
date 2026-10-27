@@ -1,11 +1,16 @@
 ---
-description: Auto-delegate image-related requests to the vision-worker subagent (qwen3.5-397b-a17b) because the default model (glm-5.2) cannot read images.
+description: Gate image requests on your own vision capability; delegate only when the active model truly cannot read images.
 alwaysApply: true
 ---
 
 # Vision Delegation Rule
 
-The default model (glm-5.2) cannot read images. When the user's request involves an image, delegate the image-analysis step to the `vision-worker` subagent instead of attempting to read or describe the image yourself.
+**Step 0 — check your own capability first.** This rule is capability-gated, not model-name-gated. Do NOT infer blindness from a model name. Before touching this rule, ask: *can the model I am running as accept image input?*
+
+- If your active model is **vision-capable** (any multimodal/image-input model — e.g. DeepSeek v4.1, any `*-vision` or multimodal variant, Claude, GPT-4o-class, Gemini), then **analyze the image yourself. Do NOT delegate.** Model names in older revisions of this rule (e.g. "glm-5.2", "deepseek-v4-flash") are historical and version-specific — a newer version of the same family may well be vision-capable. Never treat a listed name as proof you lack vision.
+- If — and only if — your active model genuinely has **no image input capability**, delegate the image-analysis step to a vision-capable subagent. Confirm a vision-capable subagent model is actually available at call time (see "How to delegate"); if none is, tell the user rather than delegating to a blind agent.
+
+Principle: **the model that can see should do the seeing.** Delegating a vision task to another non-vision model fails silently (the subagent receives no image and reports nothing useful). A delegation that stays inside a blind model is worse than no delegation.
 
 ## When to delegate
 
@@ -18,9 +23,12 @@ Delegate to `vision-worker` via the Task tool whenever the user's request involv
 
 ## How to delegate
 
-Use the Task tool with:
+Only reach here when Step 0 established that your own model cannot see images AND a vision-capable subagent model is actually selectable. In Cursor the selectable subagent models are limited (often just the parent model or a small set) — verify against the available-subagent-models list before delegating. If the only selectable subagent model is the same blind model you are running as, delegation cannot work: stop and tell the user instead.
 
-- `subagent_type`: `generalPurpose`
+Use the Task tool with a vision-capable subagent:
+
+- `subagent_type`: `generalPurpose` (as `vision-worker`) or the dedicated `vision-worker` subagent if present
+- `model`: a **vision-capable** model. Prefer a model confirmed to accept image input; if your environment exposes qwen3.5-397b-a17b use it, otherwise pick any vision-capable option from the available-subagent-models list. Do NOT hardcode a model that isn't in that list — an unavailable model silently falls back to `inherit` (your blind model) and the image never gets seen.
 - `description`: short label like "Analyze screenshot"
 - `prompt`: include the user's original question + the absolute image file path + any relevant context the subagent needs.
 - `file_attachments`: pass the image file path(s) as an array, e.g. `["/abs/path/to/image.png"]`.
@@ -31,7 +39,8 @@ Example:
 
 ```text
 Task({
-  subagent_type: "generalPurpose",
+  subagent_type: "vision-worker",
+  model: "<a vision-capable model from the available-subagent-models list>",
   description: "Analyze UI screenshot",
   prompt: "The user asked: 'What's wrong with this login screen?'. The image is at /Users/me/Desktop/login.png. Describe the UI, identify any visual issues, and report back.",
   file_attachments: ["/Users/me/Desktop/login.png"],
@@ -44,6 +53,7 @@ Task({
 
 - Take the subagent's returned analysis and continue the conversation as if you had read the image yourself.
 - Do not tell the user "I cannot read images" — just delegate silently and act on the result.
+- **Verify the subagent actually saw the image.** If it reports no image, empty output, or describes nothing visual, delegation failed (usually a blind fallback model). Do not relay that non-answer as if it were analysis — report the failure and ask the user to attach the image or provide a description.
 - If the subagent reports it received no image, ask the user to attach the image or provide its path.
 
 ## When NOT to delegate

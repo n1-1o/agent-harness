@@ -33,7 +33,7 @@ Three tiers. Pick before spawning subagent or starting work.
 - "add validation to the form component"
 - "write a README for this module"
 - "refactor this function to use hooks"
-- "analyze this screenshot" (delegated to `vision-worker` subagent)
+- "analyze this screenshot" (do it directly if your model is vision-capable, else delegate to `vision-worker` subagent)
 
 ### Heavy tier (glm-5.2)
 - "plan a multi-step feature"
@@ -52,17 +52,21 @@ When spawning `Task` subagents:
 - `explore` subagent → qwen3.5-397b-a17b (codebase search, pattern finding)
 - `generalPurpose` subagent → qwen3.5-397b-a17b or glm-5.2 (depends on scope)
 - `bugbot` / `security-review` → glm-5.2 (primary) or opus (alt for deep reasoning)
-- `vision-worker` → qwen3.5-397b-a17b (image analysis — glm-5.2 cannot read images; see `vision-delegation` rule)
+- `vision-worker` → any vision-capable model (image analysis — delegate only when the active model lacks image input; see `vision-delegation` rule)
 
 ## Vision delegation rule
 
-**glm-5.2 has no image capability.** Any task involving images (screenshots, mockups, wireframes, renders, diagrams) must delegate the image-analysis step to `vision-worker` subagent (qwen3.5-397b-a17b). Triggered by:
+**Vision is a capability, not a model name.** Check whether your active model accepts image input before acting:
+- **Vision-capable active model** (multimodal/image-input — e.g. DeepSeek v4.1, any `*-vision`/multimodal variant, Claude, GPT-4o-class, Gemini): analyze the image yourself. Do NOT delegate.
+- **Blind active model**: delegate to a vision-capable subagent — but only if a vision-capable subagent model is actually selectable. Otherwise stop and tell the user.
+
+Older revisions named specific blind models (glm-5.2, deepseek-v4-flash); those names are historical and version-specific — never infer blindness from a name. Triggered by:
 - Image file attached (png/jpg/jpeg/webp/gif/bmp/svg)
 - User references image, screenshot, mockup, wireframe, render, diagram
 - User says "look at this", "describe this", "implement this design", "fix this UI"
 - Image path appears in conversation
 
-See `vision-delegation.mdc` rule for full delegation protocol. Do NOT route image tasks to glm-5.2 directly.
+See `vision-delegation.mdc` rule for full delegation protocol. Do NOT delegate image tasks if your own model can already see images.
 
 ## Escalation rules
 
@@ -70,7 +74,7 @@ See `vision-delegation.mdc` rule for full delegation protocol. Do NOT route imag
 2. If model fails twice or returns "I can't" → escalate one tier
 3. Never de-escalate mid-task (context loss > savings)
 4. After heavy task done → return to medium/small default
-5. Image tasks: always medium tier via `vision-worker`, never escalate to glm-5.2
+5. Image tasks: if your own model is vision-capable, do them directly; only otherwise delegate via `vision-worker`, and never delegate to a blind model
 6. Preserve high-intelligence models: never route planning/architecture/security to medium or small — these are always heavy tier even if the prompt looks short
 
 ## Budget override

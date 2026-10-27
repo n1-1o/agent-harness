@@ -45,7 +45,7 @@ cd agent-harness
 || `plan-first-execution.mdc` | Never execute complex tasks without an approved plan |
 || `caveman.mdc` | Terse output, ~75% fewer tokens |
 || `model-router.mdc` | Cost-aware model routing — preserve high-intelligence models for hard work |
-|| `vision-delegation.mdc` | Delegate image requests to vision-capable subagent; includes Evidence-First Debugging |
+|| `vision-delegation.mdc` | Capability-gated: analyze images yourself if your model can see them, else delegate to a vision-capable subagent; includes Evidence-First Debugging |
 || `security-standards.mdc` | Zero-trust, Zod validation, threat modeling |
 || `documentation-conciseness.mdc` | 3-doc max, reference-over-repeat |
 || `front-end-development.mdc` | React/Next/Zod/Shadcn conventions + general a11y (WCAG AA) |
